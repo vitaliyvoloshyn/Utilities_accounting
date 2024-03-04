@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Комунальні послуги</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/custom_style.css">
+</head>
+<body>
+<div class="container-fluid header">
+    <div class="row">
+        <div class="col-1">
+            <img class="icon" src="/static/images/{{ cur_category.providers[0].icon }}" alt="EK_ico">
+        </div>
+        <div class="col-4">
+            <span>{{ cur_category.name }}
+            </span>
+            <h2 class="operator_name">{{ cur_category.providers[0].name }}</h2>
+        </div>
+    </div>
+</div>
+
+
+{% include "navigation.html" %}
+{% block content %} {% endblock %}
+
+
+<script src="/static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

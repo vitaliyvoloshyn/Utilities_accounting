@@ -1,0 +1,21 @@
+{% block navigation %}
+<nav class="navbar navbar-expand-lg bg-primary navbar-toggleable">
+    <div class="container-lg">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <a class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">ирири
+            </a>
+            {% for el in navigation %}
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/category/{{ el.id }}">{{ el.name }}</a>
+                </li>
+            </ul>
+            {% endfor %}
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+
+
