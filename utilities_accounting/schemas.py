@@ -49,7 +49,7 @@ class CounterRelDTO(CounterDTO):
 
 class IndicatorDTO(BaseModel):
     id: int
-    value: int
+    value: int = Field(ge=0)
     date: datetime
     deleted: bool = False
     counter_id: int
@@ -75,7 +75,7 @@ class AccountRelDTO(AccountDTO):
 
 class TariffDTO(BaseModel):
     id: int
-    value: float = Field(decimal_places=2)
+    value: float = Field(decimal_places=2, ge=1)
     date: datetime
     provider_id: int
 
@@ -86,7 +86,7 @@ class TariffRelDTO(BaseModel):
 
 class PaymentDTO(BaseModel):
     id: int
-    value: float = Field(decimal_places=2)
+    value: float = Field(decimal_places=2, ge=1)
     date: datetime
     account_id: int
 
