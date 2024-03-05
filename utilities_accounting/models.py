@@ -75,12 +75,12 @@ class Account(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     number: Mapped[str]
     balance: Mapped[float]
-    currency: Mapped[str] = mapped_column(String(3), server_default='UAH')
     provider_id: Mapped[int] = mapped_column(ForeignKey('provider.id'))
+    currency_id: Mapped[int] = mapped_column(ForeignKey('currency.id'))
     deleted: Mapped[bool] = mapped_column(server_default='False')
     provider: Mapped['Provider'] = relationship(back_populates='accounts')
     payments: Mapped[List['Payment']] = relationship(back_populates='account')
-
+    currency: Mapped['Currency'] = relationship(back_populates='accounts')
 
     def __repr__(self) -> str:
         return f"Account(id={self.id!r}, number={self.number!r})"
@@ -107,4 +107,15 @@ class Payment(Base):
     account: Mapped['Account'] = relationship(back_populates='payments')
 
     def __repr__(self) -> str:
-        return f"Tarrif(id={self.id!r}, name={self.value!r})"
+        return f"Payment(id={self.id!r}, name={self.value!r})"
+
+
+class Currency(Base):
+    __tablename__ = 'currency'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    code: Mapped[str] = mapped_column(String(3))
+    accounts: Mapped[List['Account']] = relationship(back_populates='currency')
+
+    def __repr__(self) -> str:
+        return f"Currency(id={self.id!r}, name={self.name!r})"

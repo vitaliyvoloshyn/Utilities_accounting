@@ -63,7 +63,7 @@ class AccountDTO(BaseModel):
     id: int
     number: str
     balance: float = Field(decimal_places=2)
-    currency: str = Field(min_items=3, max_items=3, default='UAH')
+    currency_id: int
     provider_id: int
     deleted: bool = False
 
@@ -71,6 +71,7 @@ class AccountDTO(BaseModel):
 class AccountRelDTO(AccountDTO):
     provider: 'ProviderDTO'
     payments: List["PaymentDTO"]
+    currency: 'CurrencyDTO'
 
 
 class TariffDTO(BaseModel):
@@ -93,3 +94,12 @@ class PaymentDTO(BaseModel):
 
 class PaymentRelDTO(BaseModel):
     account: "AccountDTO"
+
+class CurrencyDTO(BaseModel):
+    id: int
+    name: str
+    code: str = Field(min_items=3, max_items=3)
+    accounts: int
+
+class CurrencyRelDTO(CurrencyDTO):
+    accounts: List['CurrencyDTO']
