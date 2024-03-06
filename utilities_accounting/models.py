@@ -21,7 +21,6 @@ class Provider(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
     category: Mapped['Category'] = relationship(back_populates='providers', cascade='all, delete')
     accounts: Mapped[List['Account']] = relationship(back_populates='provider', cascade='all, delete')
-    tariffs: Mapped[List['Tariff']] = relationship(back_populates='provider', cascade='all, delete')
 
     def __repr__(self) -> str:
         return f"Provider(id={self.id!r}, name={self.name!r})"
@@ -81,6 +80,8 @@ class Account(Base):
     provider: Mapped['Provider'] = relationship(back_populates='accounts', cascade='all, delete')
     payments: Mapped[List['Payment']] = relationship(back_populates='account', cascade='all, delete')
     currency: Mapped['Currency'] = relationship(back_populates='accounts', cascade='all, delete')
+    tariffs: Mapped[List['Tariff']] = relationship(back_populates='account', cascade='all, delete')
+
 
     def __repr__(self) -> str:
         return f"Account(id={self.id!r}, number={self.number!r})"
@@ -91,8 +92,8 @@ class Tariff(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     value: Mapped[float]
     date: Mapped[datetime] = mapped_column(server_default=func.current_date())
-    provider_id: Mapped[int] = mapped_column(ForeignKey('provider.id'))
-    provider: Mapped['Provider'] = relationship(back_populates='tariffs', cascade='all, delete')
+    account_id: Mapped[int] = mapped_column(ForeignKey('account.id'))
+    account: Mapped['Account'] = relationship(back_populates='tariffs', cascade='all, delete')
 
     def __repr__(self) -> str:
         return f"Tariff(id={self.id!r}, value={self.value!r})"
