@@ -19,9 +19,9 @@ class Provider(Base):
     site: Mapped[str] = mapped_column(nullable=True)
     deleted: Mapped[bool] = mapped_column(server_default='False')
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
-    category: Mapped['Category'] = relationship(back_populates='providers')
-    accounts: Mapped[List['Account']] = relationship(back_populates='provider')
-    tariffs: Mapped[List['Tariff']] = relationship(back_populates='provider')
+    category: Mapped['Category'] = relationship(back_populates='providers', cascade='all, delete')
+    accounts: Mapped[List['Account']] = relationship(back_populates='provider', cascade='all, delete')
+    tariffs: Mapped[List['Tariff']] = relationship(back_populates='provider', cascade='all, delete')
 
     def __repr__(self) -> str:
         return f"Provider(id={self.id!r}, name={self.name!r})"
@@ -34,8 +34,8 @@ class Category(Base):
     name: Mapped[str] = mapped_column(String(50), unique=True)
     url_path: Mapped[str] = mapped_column(unique=True)
     deleted: Mapped[bool] = mapped_column(server_default='False')
-    providers: Mapped[List["Provider"]] = relationship(back_populates="category", cascade="all, delete-orphan")
-    counters: Mapped[List['Counter']] = relationship(back_populates='category')
+    providers: Mapped[List["Provider"]] = relationship(back_populates="category", cascade='all, delete')
+    counters: Mapped[List['Counter']] = relationship(back_populates='category', cascade='all, delete')
 
     def __repr__(self) -> str:
         return f"Category(id={self.id!r}, name={self.name!r})"
@@ -64,7 +64,7 @@ class Indicator(Base):
     date: Mapped[datetime] = mapped_column(server_default=func.current_date())
     deleted: Mapped[bool] = mapped_column(server_default='False')
     counter_id: Mapped[int] = mapped_column(ForeignKey('counter.id'))
-    counter: Mapped['Counter'] = relationship(back_populates='indicators')
+    counter: Mapped['Counter'] = relationship(back_populates='indicators', cascade='all, delete')
 
     def __repr__(self) -> str:
         return f"Indicator(id={self.id!r}, value={self.value!r})"
@@ -78,9 +78,9 @@ class Account(Base):
     provider_id: Mapped[int] = mapped_column(ForeignKey('provider.id'))
     currency_id: Mapped[int] = mapped_column(ForeignKey('currency.id'))
     deleted: Mapped[bool] = mapped_column(server_default='False')
-    provider: Mapped['Provider'] = relationship(back_populates='accounts')
-    payments: Mapped[List['Payment']] = relationship(back_populates='account')
-    currency: Mapped['Currency'] = relationship(back_populates='accounts')
+    provider: Mapped['Provider'] = relationship(back_populates='accounts', cascade='all, delete')
+    payments: Mapped[List['Payment']] = relationship(back_populates='account', cascade='all, delete')
+    currency: Mapped['Currency'] = relationship(back_populates='accounts', cascade='all, delete')
 
     def __repr__(self) -> str:
         return f"Account(id={self.id!r}, number={self.number!r})"
@@ -92,7 +92,7 @@ class Tariff(Base):
     value: Mapped[float]
     date: Mapped[datetime] = mapped_column(server_default=func.current_date())
     provider_id: Mapped[int] = mapped_column(ForeignKey('provider.id'))
-    provider: Mapped['Provider'] = relationship(back_populates='tariffs')
+    provider: Mapped['Provider'] = relationship(back_populates='tariffs', cascade='all, delete')
 
     def __repr__(self) -> str:
         return f"Tariff(id={self.id!r}, value={self.value!r})"
