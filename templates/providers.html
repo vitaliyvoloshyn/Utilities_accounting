@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-xl-6">
+    <!--таблиця показників-->
+    <h4>Список операторів комунальних послуг</h4>
+    <table class="table table-bordered text-center">
+        <tr class="table-primary">
+            <th>Оператор</th>
+            <th>Категорія</th>
+        </tr>
+        {% for provider in providers %}
+        <tr>
+            <td>
+                <a href="/provider/{{provider.id}}">{{provider.name}}</a></td>
+            <td>{{provider.category.name}}</td>
+        </tr>
+    {% endfor %}
+
+    </table>
+</div>
+    {% endblock %}

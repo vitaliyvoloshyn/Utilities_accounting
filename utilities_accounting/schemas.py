@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -7,20 +7,20 @@ from pydantic import BaseModel, Field
 class CategoryDTO(BaseModel):
     id: int
     name: str
-    url_path: str
+    # url_path: str
     deleted: bool = False
 
 
 class CategoryRelDTO(CategoryDTO):
     providers: List["ProviderDTO"]
-    counters: List["CounterDTO"]
+    counters: List["CounterRelDTO"]
 
 
 class ProviderDTO(BaseModel):
     id: int
     name: str
     iban: Optional[str] = None
-    edrpou: Optional[str] = Field(max_items=8, min_items=8, regex=r"\d{8}")
+    edrpou: Optional[str] = Field(max_items=8, min_items=8)
     icon: Optional[str] = None
     site: Optional[str] = None
     deleted: bool = False
@@ -29,28 +29,26 @@ class ProviderDTO(BaseModel):
 
 class ProviderRelDTO(ProviderDTO):
     category: "CategoryDTO"
-    counters: List["CounterDTO"]
-    tariffs: List["TariffDTO"]
-    payments: List["PaymentDTO"]
+    accounts: List['AccountDTO']
 
 
 class CounterDTO(BaseModel):
     id: int
     name: str
-    date: datetime
+    date: date
     deleted: bool = False
-    provider_id: int
+    # category_id: int
 
 
 class CounterRelDTO(CounterDTO):
-    category: 'CategoryDTO'
+    # category: 'CategoryDTO'
     indicators: List['IndicatorDTO']
 
 
 class IndicatorDTO(BaseModel):
     id: int
     value: int = Field(ge=0)
-    date: datetime
+    date: date
     deleted: bool = False
     counter_id: int
 
@@ -62,7 +60,7 @@ class IndicatorRelDTO(IndicatorDTO):
 class AccountDTO(BaseModel):
     id: int
     number: str
-    balance: float = Field(decimal_places=2)
+    balance: float
     currency_id: int
     provider_id: int
     deleted: bool = False
@@ -76,8 +74,8 @@ class AccountRelDTO(AccountDTO):
 
 class TariffDTO(BaseModel):
     id: int
-    value: float = Field(decimal_places=2, ge=1)
-    date: datetime
+    value: float = Field(ge=1)
+    date: date
     provider_id: int
 
 
@@ -87,8 +85,8 @@ class TariffRelDTO(BaseModel):
 
 class PaymentDTO(BaseModel):
     id: int
-    value: float = Field(decimal_places=2, ge=1)
-    date: datetime
+    value: float = Field(ge=1)
+    date: date
     account_id: int
 
 

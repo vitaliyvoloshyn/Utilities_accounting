@@ -1,0 +1,16 @@
+<ul class="menu">
+    {% if cur_category.counters %}
+    <li>
+        <a class="ref-menu" href="#">Історія показників</a>
+    </li>
+    {% endif %}
+    <li>
+        <a class="ref-menu" href="#">Історія платежів</a>
+    </li>
+    <li>
+        <a class="ref-menu" href="#">Коливання тарифів</a>
+    </li>
+    <li>
+        <a class="ref-menu" href="{{ cur_category.id }}/provider/{{ cur_category.providers[0].id }}">Постачальник послуг</a>
+    </li>
+</ul>

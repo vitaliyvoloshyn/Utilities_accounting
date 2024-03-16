@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 from utilities_accounting.models import Base
+from utilities_accounting.testing_data import add_data, my_select
 
 
 class DB:
@@ -25,8 +26,10 @@ class DB:
         print(self.engine)
         self.Base.metadata.drop_all(self.engine)
 
-    # def insert_test_data(self):
-    #     add_data(self.session)
+    def insert_test_data(self):
+        add_data(self.session)
+        my_select(self.session)
+
 
     def get_session(self):
         return self.session

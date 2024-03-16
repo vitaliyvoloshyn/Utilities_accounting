@@ -17,8 +17,8 @@ class Provider(Base):
     edrpou: Mapped[str] = mapped_column(String(8), nullable=True)
     icon: Mapped[str] = mapped_column(nullable=True)
     site: Mapped[str] = mapped_column(nullable=True)
-    deleted: Mapped[bool] = mapped_column(server_default='False')
-    category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
+    # deleted: Mapped[bool] = mapped_column(server_default='False')
+    category_id: Mapped[int] = mapped_column(ForeignKey('category.id', ondelete='CASCADE'))
     category: Mapped['Category'] = relationship(back_populates='providers', cascade='all, delete')
     accounts: Mapped[List['Account']] = relationship(back_populates='provider', cascade='all, delete')
 
@@ -31,10 +31,9 @@ class Category(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True)
-    url_path: Mapped[str] = mapped_column(unique=True)
-    deleted: Mapped[bool] = mapped_column(server_default='False')
+    # deleted: Mapped[bool] = mapped_column(server_default='False')
     providers: Mapped[List["Provider"]] = relationship(back_populates="category", cascade='all, delete')
-    counters: Mapped[List['Counter']] = relationship(back_populates='category', cascade='all, delete')
+    counters: Mapped[List['Counter']] = relationship(back_populates='categories', secondary='category_counter')
 
     def __repr__(self) -> str:
         return f"Category(id={self.id!r}, name={self.name!r})"
@@ -46,13 +45,20 @@ class Counter(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
     date: Mapped[datetime] = mapped_column(server_default=func.current_date())
-    deleted: Mapped[bool] = mapped_column(server_default='False')
-    category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
-    category: Mapped['Category'] = relationship(back_populates='counters')
+    # deleted: Mapped[bool] = mapped_column(server_default='False')
+    # category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
+    categories: Mapped[List['Category']] = relationship(back_populates='counters', secondary='category_counter')
     indicators: Mapped[List['Indicator']] = relationship(back_populates='counter')
 
+
     def __repr__(self) -> str:
-        return f"Indicator(id={self.id!r}, name={self.name!r})"
+        return f"Counter(id={self.id!r}, name={self.name!r})"
+
+class CategoryCounter(Base):
+    __tablename__ = 'category_counter'
+    category_id: Mapped[int] = mapped_column(ForeignKey('category.id'), primary_key=True)
+    counter_id: Mapped[int] = mapped_column(ForeignKey('counter.id'), primary_key=True)
+
 
 
 class Indicator(Base):
@@ -61,7 +67,7 @@ class Indicator(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     value: Mapped[int]
     date: Mapped[datetime] = mapped_column(server_default=func.current_date())
-    deleted: Mapped[bool] = mapped_column(server_default='False')
+    # deleted: Mapped[bool] = mapped_column(server_default='False')
     counter_id: Mapped[int] = mapped_column(ForeignKey('counter.id'))
     counter: Mapped['Counter'] = relationship(back_populates='indicators', cascade='all, delete')
 
@@ -76,7 +82,7 @@ class Account(Base):
     balance: Mapped[float]
     provider_id: Mapped[int] = mapped_column(ForeignKey('provider.id'))
     currency_id: Mapped[int] = mapped_column(ForeignKey('currency.id'))
-    deleted: Mapped[bool] = mapped_column(server_default='False')
+    # deleted: Mapped[bool] = mapped_column(server_default='False')
     provider: Mapped['Provider'] = relationship(back_populates='accounts', cascade='all, delete')
     payments: Mapped[List['Payment']] = relationship(back_populates='account', cascade='all, delete')
     currency: Mapped['Currency'] = relationship(back_populates='accounts', cascade='all, delete')
@@ -120,3 +126,18 @@ class Currency(Base):
 
     def __repr__(self) -> str:
         return f"Currency(id={self.id!r}, name={self.name!r})"
+
+
+class Parent(Base):
+    __tablename__ = 'parent'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    childs: Mapped[List['Child']] = relationship(back_populates='parent', cascade='save-update, merge, delete', passive_deletes=True)
+
+
+class Child(Base):
+    __tablename__ = 'child'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    parent_id: Mapped[int] = mapped_column(ForeignKey('parent.id', ondelete='CASCADE'))
+    parent: Mapped['Parent'] = relationship(back_populates='childs')
