@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import String, ForeignKey, func
+from sqlalchemy import String, ForeignKey, func, Enum as sa_Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+
+from utilities_accounting.schemas import UnitEnum
 
 
 class Base(DeclarativeBase):
@@ -17,7 +19,6 @@ class Provider(Base):
     edrpou: Mapped[str] = mapped_column(String(8), nullable=True)
     icon: Mapped[str] = mapped_column(nullable=True)
     site: Mapped[str] = mapped_column(nullable=True)
-    # deleted: Mapped[bool] = mapped_column(server_default='False')
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id', ondelete='CASCADE'))
     category: Mapped['Category'] = relationship(back_populates='providers', cascade='all, delete')
     accounts: Mapped[List['Account']] = relationship(back_populates='provider', cascade='all, delete')
@@ -46,19 +47,19 @@ class Counter(Base):
     name: Mapped[str] = mapped_column(String(50))
     date: Mapped[datetime] = mapped_column(server_default=func.current_date())
     # deleted: Mapped[bool] = mapped_column(server_default='False')
-    # category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
+    unit_id: Mapped[int] = mapped_column(ForeignKey('unit.id'))
     categories: Mapped[List['Category']] = relationship(back_populates='counters', secondary='category_counter')
     indicators: Mapped[List['Indicator']] = relationship(back_populates='counter')
-
+    unit: Mapped['Unit'] = relationship(back_populates='counters')
 
     def __repr__(self) -> str:
         return f"Counter(id={self.id!r}, name={self.name!r})"
+
 
 class CategoryCounter(Base):
     __tablename__ = 'category_counter'
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id'), primary_key=True)
     counter_id: Mapped[int] = mapped_column(ForeignKey('counter.id'), primary_key=True)
-
 
 
 class Indicator(Base):
@@ -87,7 +88,6 @@ class Account(Base):
     payments: Mapped[List['Payment']] = relationship(back_populates='account', cascade='all, delete')
     currency: Mapped['Currency'] = relationship(back_populates='accounts', cascade='all, delete')
     tariffs: Mapped[List['Tariff']] = relationship(back_populates='account', cascade='all, delete')
-
 
     def __repr__(self) -> str:
         return f"Account(id={self.id!r}, number={self.number!r})"
@@ -128,16 +128,8 @@ class Currency(Base):
         return f"Currency(id={self.id!r}, name={self.name!r})"
 
 
-class Parent(Base):
-    __tablename__ = 'parent'
+class Unit(Base):
+    __tablename__ = 'unit'
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
-    childs: Mapped[List['Child']] = relationship(back_populates='parent', cascade='save-update, merge, delete', passive_deletes=True)
-
-
-class Child(Base):
-    __tablename__ = 'child'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
-    parent_id: Mapped[int] = mapped_column(ForeignKey('parent.id', ondelete='CASCADE'))
-    parent: Mapped['Parent'] = relationship(back_populates='childs')
+    value: Mapped[str]
+    counters: Mapped[List['Counter']] = relationship(back_populates='unit')

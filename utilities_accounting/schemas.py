@@ -1,4 +1,5 @@
 from datetime import date
+from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -93,11 +94,26 @@ class PaymentDTO(BaseModel):
 class PaymentRelDTO(BaseModel):
     account: "AccountDTO"
 
+
 class CurrencyDTO(BaseModel):
     id: int
     name: str
     code: str = Field(min_items=3, max_items=3)
     accounts: int
 
+
 class CurrencyRelDTO(CurrencyDTO):
     accounts: List['CurrencyDTO']
+
+
+class UnitEnum(Enum):
+    ELECTRICITY = 'кВт*год'
+    VOLUME = 'м3'
+
+
+class UnitReadDTO(BaseModel):
+    id: int
+    value: str
+
+class UnitAddDTO(BaseModel):
+    value: UnitEnum

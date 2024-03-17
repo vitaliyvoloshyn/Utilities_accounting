@@ -1,14 +1,20 @@
 from sqlalchemy import insert, text, select
 from sqlalchemy.orm import selectinload
 
-from .models import Category, Provider, Indicator, Account, Payment, Tariff, Currency, Counter, CategoryCounter, Parent, \
-    Child
+from .models import Category, Provider, Indicator, Account, Payment, Tariff, Currency, Counter, CategoryCounter, Unit
 
 
+# Додаємо валюту
 currencies = [
     Currency(name='Українська гривня', code='UAH'),
     Currency(name='Американський долар', code='USD'),
     Currency(name='Євро', code='EUR'),
+]
+
+# Додаємо одиниці вимірювання
+units = [
+    Unit(value='кВт*год'),
+    Unit(value='м3'),
 ]
 
 categories = [
@@ -34,6 +40,10 @@ counters[1].categories.append(categories[1])
 counters[2].categories.append(categories[1])
 counters[3].categories.append(categories[2])
 counters[2].categories.append(categories[3])
+counters[0].unit = units[0]
+counters[1].unit = units[1]
+counters[2].unit = units[1]
+counters[3].unit = units[1]
 
 indicators = [
     Indicator(value=3587),
@@ -53,17 +63,6 @@ counters[1].indicators.append(indicators[8])
 counters[2].indicators.extend(indicators[4:6])
 counters[3].indicators.extend(indicators[6:8])
 
-parents = [
-    Parent(name='parent1'),
-    Parent(name='parent2'),
-]
-
-childs = [
-    Child(name='child1'),
-    Child(name='child2'),
-]
-childs[0].parent = parents[0]
-childs[1].parent = parents[1]
 
 providers = [
     Provider(name="Електромережі", iban="UA32432765498765432976", edrpou="12356789", icon="EK.png",
@@ -88,12 +87,6 @@ categories[3].providers.append(providers[3])
 categories[4].providers.append(providers[4])
 categories[5].providers.append(providers[5])
 categories[6].providers.append(providers[6])
-# providers[1].category.append(categories[1])
-# providers[2].category.append(categories[2])
-# providers[3].category.append(categories[3])
-# providers[4].category.append(categories[4])
-# providers[5].category.append(categories[5])
-# providers[6].category.append(categories[6])
 
 
 def insert_data_in_currency(session):
@@ -201,8 +194,6 @@ def add_data(session):
         conn.add_all(counters)
         conn.add_all(indicators)
         conn.add_all(providers)
-        conn.add_all(parents)
-        conn.add_all(childs)
         conn.commit()
     # insert_data_to_category(session)
     # insert_data_in_provider(session)

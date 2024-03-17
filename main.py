@@ -3,12 +3,12 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from database import get_db
-from utilities_accounting.views import router as utilities_router, index_router
+from utilities_accounting.views import router as utilities_router, index_router, admin_router
 
 app = FastAPI()
 app.include_router(utilities_router)
 app.include_router(index_router)
-# app.include_router(water_router)
+app.include_router(admin_router)
 # app.include_router(main_router)
 app.mount("/static/css", StaticFiles(directory="static/css"), name='css')
 app.mount("/static/images", StaticFiles(directory="static/images"), name='images')

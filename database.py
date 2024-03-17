@@ -13,8 +13,11 @@ class DB:
 
     def __init__(self, base: Type[DeclarativeBase], echo: bool = False):
         self.__get_environ()
+        # self.engine = create_engine(
+        #     f"postgresql+psycopg2://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}",
+        #     echo=True)
         self.engine = create_engine(
-            f"postgresql+psycopg2://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}",
+            f"sqlite:///database.db",
             echo=True)
         self.session = sessionmaker(self.engine)
         self.Base = base

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <form action="#" method="post">
+            <div class="col-md">
+                <label for="categoryName" class="form-label label">Ім'я категорії</label>
+                <input type="text" class="form-control" id="categoryName">
+
+                <div class="form-check form-switch form-label label">
+                    <input class="form-check-input" type="checkbox" id="categoryIsCounter">
+                    <label class="form-check-label" for="categoryIsCounter">Наявність лічильника</label>
+                </div>
+
+                <label for="counterName" class="form-label label">Назва лічильника</label>
+                <input type="text" class="form-control" id="counterName">
+
+                <label for="counterIndicator" class="form-label label">Початкові показники</label>
+                <input type="text" class="form-control" id="counterIndicator">
+
+                <label for="counterUnit" class="form-label label">Одиниця виміру</label>
+                <select class="form-select" aria-label="Одиниця виміру" id="counterUnit">
+                    <option selected>Виберіть зі списку одиницю виміру...</option>
+                    {% for unit in units %}
+                        <option value="{{unit.id}}">{{unit.value}}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-outline-primary btn-safe" id="Paymentbtn">Зберегти</button>
+        </form>
+    </div>
+</div>
+
+</div>
+
+{% endblock %}
+
