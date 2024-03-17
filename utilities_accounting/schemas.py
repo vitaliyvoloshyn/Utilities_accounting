@@ -1,15 +1,17 @@
+import datetime
 from datetime import date
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator, field_validator
 
 
-class CategoryDTO(BaseModel):
-    id: int
+class CategoryAddDTO(BaseModel):
     name: str
-    # url_path: str
-    deleted: bool = False
+
+
+class CategoryDTO(CategoryAddDTO):
+    id: int
 
 
 class CategoryRelDTO(CategoryDTO):
@@ -32,13 +34,17 @@ class ProviderRelDTO(ProviderDTO):
     category: "CategoryDTO"
     accounts: List['AccountDTO']
 
+def get_now():
+    return datetime.datetime.now()
 
-class CounterDTO(BaseModel):
-    id: int
+class CounterAddDTO(BaseModel):
     name: str
-    date: date
-    deleted: bool = False
-    # category_id: int
+
+
+
+
+class CounterDTO(CounterAddDTO):
+    id: int
 
 
 class CounterRelDTO(CounterDTO):
@@ -114,6 +120,7 @@ class UnitEnum(Enum):
 class UnitReadDTO(BaseModel):
     id: int
     value: str
+
 
 class UnitAddDTO(BaseModel):
     value: UnitEnum

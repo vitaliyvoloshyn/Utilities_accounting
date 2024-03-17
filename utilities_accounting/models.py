@@ -32,7 +32,6 @@ class Category(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True)
-    # deleted: Mapped[bool] = mapped_column(server_default='False')
     providers: Mapped[List["Provider"]] = relationship(back_populates="category", cascade='all, delete')
     counters: Mapped[List['Counter']] = relationship(back_populates='categories', secondary='category_counter')
 
