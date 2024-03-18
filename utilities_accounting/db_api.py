@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload, joinedload
 from database import get_db
 from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, CounterRelDTO, ProviderDTO, ProviderRelDTO, \
-    UnitReadDTO, CategoryAddDTO, CounterAddDTO
+    UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO
 
 session = get_db().get_session()
 
@@ -69,10 +69,16 @@ def add_category_and_counter(category: CategoryAddDTO, counter: CounterAddDTO = 
         unit = conn.execute(select(Unit).where(Unit.id == unit_id)).scalar()
         print(unit)
         if counter:
-
-
             counter_orm = Counter(**counter.dict())
             cat.counters.append(counter_orm)
             counter_orm.unit = unit
         conn.add(cat)
         conn.commit()
+
+
+def get_categories_counters(session: session = session):
+    query = select(Category).options(joinedload(Category.counters))
+    with session() as conn:
+        res_orm = conn.execute(query).unique().scalars().all()
+        res_dto = [CategoryCounterRelDTO.model_validate(row, from_attributes=True) for row in res_orm]
+        return res_dto

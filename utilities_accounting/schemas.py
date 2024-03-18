@@ -14,9 +14,12 @@ class CategoryDTO(CategoryAddDTO):
     id: int
 
 
-class CategoryRelDTO(CategoryDTO):
+class CategoryCounterRelDTO(CategoryDTO):
+    counters: List["CounterUnitRelDTO"]
+
+
+class CategoryRelDTO(CategoryCounterRelDTO):
     providers: List["ProviderDTO"]
-    counters: List["CounterRelDTO"]
 
 
 class ProviderDTO(BaseModel):
@@ -34,21 +37,20 @@ class ProviderRelDTO(ProviderDTO):
     category: "CategoryDTO"
     accounts: List['AccountDTO']
 
-def get_now():
-    return datetime.datetime.now()
 
 class CounterAddDTO(BaseModel):
     name: str
-
-
 
 
 class CounterDTO(CounterAddDTO):
     id: int
 
 
+class CounterUnitRelDTO(CounterDTO):
+    unit: 'UnitReadDTO'
+
+
 class CounterRelDTO(CounterDTO):
-    # category: 'CategoryDTO'
     indicators: List['IndicatorDTO']
 
 

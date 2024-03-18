@@ -7,19 +7,37 @@
     <table class="table table-bordered text-center">
         <tr class="table-primary">
             <th>Категорія</th>
+            <th>Лічильники</th>
+            <th>Одиниці вимірювання</th>
         </tr>
         {% for category in categories %}
-        <tr>
-            <td>
-                <a href="/category/{{category.id}}">{{category.name}}</a></td>
-        </tr>
-        {% endfor %}
+            <tr>
+                {% if category.counters %}
+                    <td rowspan="{{category.counters | length}}">{{category.name}}</td>
 
+                    {% for counter in category.counters %}
+                        {% if loop.first %}
+                            <td>{{counter.name}}</td>
+                            <td>{{counter.unit.value}}</td>
+                        {% else %}
+                            <tr>
+                                <td>{{counter.name}}</td>
+                                <td>{{counter.unit.value}}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <td>{{category.name}}</td>
+                    <td>-</td>
+                    <td>-</td>
+                {% endif %}
+        {% endfor %}
+        </tr>
     </table>
 </div>
 <div class="row">
     <div class="col-xl-2">
-            <a class="btn btn-outline-primary btn-pay" href="/admin/category/add" role="button">Додати нову категорію</a>
-        </div>
+        <a class="btn btn-outline-primary btn-pay" href="/admin/category/add" role="button">Додати нову категорію</a>
+    </div>
 </div>
 {% endblock %}
