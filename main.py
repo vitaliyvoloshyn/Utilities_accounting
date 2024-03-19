@@ -1,6 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import PlainTextResponse
 
 from database import get_db
 from utilities_accounting.views import router as utilities_router, index_router, admin_router
@@ -13,6 +15,12 @@ app.include_router(admin_router)
 app.mount("/static/css", StaticFiles(directory="static/css"), name='css')
 app.mount("/static/images", StaticFiles(directory="static/images"), name='images')
 app.mount("/static/js", StaticFiles(directory="static/js"), name='js')
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return PlainTextResponse(str(exc), status_code=400)
+
 
 db = get_db()
 

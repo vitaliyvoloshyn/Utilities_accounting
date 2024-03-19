@@ -7,9 +7,11 @@ from starlette import status
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO, CategoryAddDTO, CounterAddDTO
-from utilities_accounting.db_api import get_category, get_rel_categories, get_providers, get_categories, get_unit_list, \
-    add_category_orm, add_category_and_counter, get_categories_counters
+from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO, CategoryAddDTO, CounterAddDTO, \
+    ProviderAddDTO
+from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
+    get_unit_list, \
+    add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm
 
 router = APIRouter(prefix='/category', tags=['Main app'])
 index_router = APIRouter(tags=['Index'])
@@ -52,8 +54,8 @@ async def get_provider(request: Request, provider_pk: int):
 
 
 @admin_router.get('/provider')
-def get_providers_list(request: Request):
-    providers = get_providers()
+async def get_providers(request: Request):
+    providers = get_providers_list()
     categories = get_categories()
     print(providers)
     return templates.TemplateResponse(name='providers.html', context={'request': request,
@@ -61,6 +63,33 @@ def get_providers_list(request: Request):
                                                                       'providers': providers,
                                                                       'categories': categories,
                                                                       })
+
+
+@admin_router.get('/provider/add')
+async def add_category(request: Request):
+    categories = get_categories()
+    return templates.TemplateResponse(name='add_provider.html', context={'request': request,
+                                                                         'cur_category': [],
+                                                                         'categories': categories,
+                                                                         })
+
+
+@admin_router.post('/provider/add')
+async def add_provider(name: str = Form(),
+                       iban: str = Form(),
+                       edrpou: str = Form(),
+                       site: str = Form(),
+                       category_id: int = Form(),
+                       ):
+    # categories = get_categories()
+    provider_dto = ProviderAddDTO.model_validate({
+        'name': name,
+        'iban': iban,
+        'edrpou': edrpou,
+        'site': site,
+    })
+    add_provider_orm(provider=provider_dto, category_id=category_id)
+    return RedirectResponse('/admin/provider', status_code=status.HTTP_303_SEE_OTHER)
 
 
 @admin_router.get('/category')
@@ -99,7 +128,6 @@ async def add_category_post(categoryName: str = Form(),
             counter_dto = CounterAddDTO.model_validate({'name': counterName})
 
         add_category_and_counter(category=category_dto, counter=counter_dto, unit_id=counterUnitId)
-        print(category_dto)
     except IntegrityError as e:
         return {'detail': "Така категорія вже існує"}
     return RedirectResponse('/admin/category', status_code=status.HTTP_303_SEE_OTHER)

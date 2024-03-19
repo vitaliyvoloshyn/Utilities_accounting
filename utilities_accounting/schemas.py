@@ -15,6 +15,7 @@ class CategoryDTO(CategoryAddDTO):
 
 
 class CategoryCounterRelDTO(CategoryDTO):
+    """view: get_category_list"""
     counters: List["CounterUnitRelDTO"]
 
 
@@ -22,20 +23,21 @@ class CategoryRelDTO(CategoryCounterRelDTO):
     providers: List["ProviderDTO"]
 
 
-class ProviderDTO(BaseModel):
-    id: int
+class ProviderAddDTO(BaseModel):
     name: str
     iban: Optional[str] = None
     edrpou: Optional[str] = Field(max_items=8, min_items=8)
     icon: Optional[str] = None
     site: Optional[str] = None
-    deleted: bool = False
-    category_id: int
+
+
+class ProviderDTO(ProviderAddDTO):
+    id: int
 
 
 class ProviderRelDTO(ProviderDTO):
+    """view: get_providers_list"""
     category: "CategoryDTO"
-    accounts: List['AccountDTO']
 
 
 class CounterAddDTO(BaseModel):

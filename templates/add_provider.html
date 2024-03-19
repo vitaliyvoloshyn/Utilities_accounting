@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <form action="#" method="post">
+            <div class="col-md">
+                <label for="provider_name" class="form-label label">Ім'я оператора</label>
+                <input type="text" class="form-control" id="provider_name" name="name">
+
+                <label for="iban" class="form-label label">IBAN рахунок</label>
+                <input type="text" class="form-control" id="iban" name="iban">
+
+                <label for="edrpou" class="form-label label">ЄДРПОУ</label>
+                <input type="text" class="form-control" id="edrpou" name="edrpou">
+
+                <label for="site" class="form-label label">Веб-сайт оператора</label>
+                <input type="text" class="form-control" id="site" name="site">
+
+                <label for="category" class="form-label label">Категорія</label>
+                <select class="form-select" id="category" name="category_id">
+                    <option selected>Виберіть зі списку категорію...</option>
+                    {% for category in categories %}
+                        <option value="{{category.id}}">{{category.name}}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-outline-primary btn-safe" id="Paymentbtn">Зберегти</button>
+        </form>
+    </div>
+</div>
+
+</div>
+
+{% endblock %}
+
