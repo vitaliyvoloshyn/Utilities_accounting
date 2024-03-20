@@ -82,7 +82,6 @@ class Account(Base):
     balance: Mapped[float]
     provider_id: Mapped[int] = mapped_column(ForeignKey('provider.id'))
     currency_id: Mapped[int] = mapped_column(ForeignKey('currency.id'))
-    # deleted: Mapped[bool] = mapped_column(server_default='False')
     provider: Mapped['Provider'] = relationship(back_populates='accounts', cascade='all, delete')
     payments: Mapped[List['Payment']] = relationship(back_populates='account', cascade='all, delete')
     currency: Mapped['Currency'] = relationship(back_populates='accounts', cascade='all, delete')

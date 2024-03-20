@@ -89,6 +89,16 @@ categories[5].providers.append(providers[5])
 categories[6].providers.append(providers[6])
 
 
+accounts = [
+    Account(number='gf8473938', balance=43.56, provider_id=1, currency_id=1),
+    Account(number='vvg567', balance=43.96, provider_id=2, currency_id=1),
+    Account(number='hbh7788', balance=67.53, provider_id=3, currency_id=1),
+    Account(number='f46', balance=9876.12, provider_id=4, currency_id=1),
+    Account(number='876543', balance=432, provider_id=5, currency_id=1),
+    Account(number='c3456789', balance=678.4, provider_id=6, currency_id=1),
+    Account(number='j5673456', balance=23.4, provider_id=7, currency_id=1),
+]
+
 def insert_data_in_currency(session):
     stmt = insert(table=Currency).values([
         {'name': 'Українська гривня', 'code': 'UAH'},
@@ -194,6 +204,7 @@ def add_data(session):
         conn.add_all(counters)
         conn.add_all(indicators)
         conn.add_all(providers)
+        conn.add_all(accounts)
         conn.commit()
     # insert_data_to_category(session)
     # insert_data_in_provider(session)

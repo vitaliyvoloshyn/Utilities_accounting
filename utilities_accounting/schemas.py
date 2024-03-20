@@ -68,18 +68,19 @@ class IndicatorRelDTO(IndicatorDTO):
     counter: "CounterDTO"
 
 
-class AccountDTO(BaseModel):
-    id: int
+class AccountAddDTO(BaseModel):
     number: str
     balance: float
     currency_id: int
     provider_id: int
-    deleted: bool = False
+
+
+class AccountDTO(AccountAddDTO):
+    id: int
 
 
 class AccountRelDTO(AccountDTO):
     provider: 'ProviderDTO'
-    payments: List["PaymentDTO"]
     currency: 'CurrencyDTO'
 
 
@@ -109,7 +110,6 @@ class CurrencyDTO(BaseModel):
     id: int
     name: str
     code: str = Field(min_items=3, max_items=3)
-    accounts: int
 
 
 class CurrencyRelDTO(CurrencyDTO):

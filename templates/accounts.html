@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-xl">
+    <!--таблиця показників-->
+    <h4>Список операторів комунальних послуг</h4>
+    <table class="table table-bordered text-center">
+        <tr class="table-primary">
+            <th>Номер рахунку</th>
+            <th>Баланс</th>
+            <th>Оператор</th>
+            <th>Валюта</th>
+        </tr>
+        {% for account in accounts %}
+            <tr>
+                <td>{{account.number}}</td>
+                <td>{{account.balance}}</td>
+                <td>{{account.provider.name}}</td>
+                <td>{{account.currency.code}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<div class="row">
+    <div class="col-xl-4">
+        <a class="btn btn-outline-primary btn-pay" href="/admin/account/add" role="button">Додати новий особовий рахунок</a>
+    </div>
+</div>
+{% endblock %}

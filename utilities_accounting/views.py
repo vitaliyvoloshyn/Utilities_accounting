@@ -11,7 +11,7 @@ from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO
     ProviderAddDTO
 from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
     get_unit_list, \
-    add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm
+    add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm, get_accounts_list
 
 router = APIRouter(prefix='/category', tags=['Main app'])
 index_router = APIRouter(tags=['Index'])
@@ -95,7 +95,6 @@ async def add_provider(name: str = Form(),
 @admin_router.get('/category')
 async def get_category_list(request: Request):
     categories = get_categories_counters()
-    print(categories)
     return templates.TemplateResponse(name='categories.html', context={'request': request,
                                                                        'cur_category': [],
                                                                        'categories': categories,
@@ -131,8 +130,30 @@ async def add_category_post(categoryName: str = Form(),
     except IntegrityError as e:
         return {'detail': "Така категорія вже існує"}
     return RedirectResponse('/admin/category', status_code=status.HTTP_303_SEE_OTHER)
-    # return templates.TemplateResponse(name='add_category.html', context={'request': request,
-    #                                                                      'cur_category': [],
-    #                                                                      'categories': categories,
-    #                                                                      'units': units
-    #                                                                      })
+
+
+@admin_router.get('/account')
+async def get_account(request: Request):
+    categories = get_categories_counters()
+    accounts = get_accounts_list()
+    print(accounts)
+    return templates.TemplateResponse(name='accounts.html', context={'request': request,
+                                                                       'cur_category': [],
+                                                                       'categories': categories,
+                                                                       'accounts': accounts,
+                                                                       })
+
+
+@admin_router.get('/account/add')
+async def page_add_account():
+    ...
+
+
+@admin_router.post('/account/add')
+async def add_account(
+        number: str = Form(),
+        balance: float = Form(),
+        currency_id: int = Form(),
+        provider_id: int = Form(),
+):
+    ...

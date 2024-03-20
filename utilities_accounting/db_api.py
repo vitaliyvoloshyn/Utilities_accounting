@@ -2,9 +2,9 @@ from sqlalchemy import select, text, and_
 from sqlalchemy.orm import selectinload, joinedload
 
 from database import get_db
-from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit
+from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit, Account
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, CounterRelDTO, ProviderDTO, ProviderRelDTO, \
-    UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO
+    UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO, AccountRelDTO
 
 session = get_db().get_session()
 
@@ -90,4 +90,12 @@ def get_categories_counters(session: session = session):
     with session() as conn:
         res_orm = conn.execute(query).unique().scalars().all()
         res_dto = [CategoryCounterRelDTO.model_validate(row, from_attributes=True) for row in res_orm]
+        return res_dto
+
+
+def get_accounts_list(session: session = session):
+    query = select(Account).options(selectinload(Account.provider))
+    with session() as conn:
+        res_orm = conn.execute(query).scalars().all()
+        res_dto = [AccountRelDTO.model_validate(row, from_attributes=True) for row in res_orm]
         return res_dto
