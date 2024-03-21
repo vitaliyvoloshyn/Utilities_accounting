@@ -1,10 +1,13 @@
 from sqlalchemy import select, text, and_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload, joinedload
 
 from database import get_db
-from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit, Account
+from exceptions import ExistORMObject
+from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit, Account, Currency
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, CounterRelDTO, ProviderDTO, ProviderRelDTO, \
-    UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO, AccountRelDTO
+    UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO, AccountRelDTO, CurrencyDTO, \
+    AccountDTO, AccountAddDTO
 
 session = get_db().get_session()
 
@@ -99,3 +102,33 @@ def get_accounts_list(session: session = session):
         res_orm = conn.execute(query).scalars().all()
         res_dto = [AccountRelDTO.model_validate(row, from_attributes=True) for row in res_orm]
         return res_dto
+
+
+def get_currency_list(session: session = session):
+    """Повертає CurrencyDTO об'єкт без відношень"""
+    query = select(Currency)
+    with session() as conn:
+        res_orm = conn.execute(query).scalars().all()
+        res_dto = [CurrencyDTO.model_validate(row, from_attributes=True) for row in res_orm]
+        return res_dto
+
+
+def add_account_orm(account: AccountAddDTO):
+    """Додає о/р в бд"""
+    if _exist_account_in_provider(account.provider_id):
+        raise ExistORMObject(text='У даного оператора вже є особовий рахунок')
+        return
+    account_orm = Account(**account.dict())
+    with session() as conn:
+        conn.add(account_orm)
+        conn.commit()
+
+
+def _exist_account_in_provider(provider_id: int, session: session = session) -> bool:
+    """Перевіряє чи є у провайдера о/р"""
+    query = select(Account).where(Account.provider_id == provider_id)
+    with session() as conn:
+        res = conn.execute(query).scalar()
+        if res:
+            return True
+        return False

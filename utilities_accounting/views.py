@@ -7,11 +7,13 @@ from starlette import status
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
+from exceptions import ExistORMObject
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO, CategoryAddDTO, CounterAddDTO, \
-    ProviderAddDTO
+    ProviderAddDTO, CurrencyDTO, AccountAddDTO
 from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
     get_unit_list, \
-    add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm, get_accounts_list
+    add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm, get_accounts_list, \
+    get_currency_list, add_account_orm
 
 router = APIRouter(prefix='/category', tags=['Main app'])
 index_router = APIRouter(tags=['Index'])
@@ -118,8 +120,8 @@ async def add_category_post(categoryName: str = Form(),
                             counterIndicator: Annotated[int | None, Form()] = None,
                             counterUnitId: Annotated[int | None, Form()] = None,
                             categoryIsCounter: Annotated[bool, Form()] = False):
-    categories = get_categories()
-    units = get_unit_list()
+    # categories = get_categories()
+    # units = get_unit_list()
     try:
         category_dto = CategoryAddDTO.model_validate({'name': categoryName})
         counter_dto = None
@@ -138,22 +140,42 @@ async def get_account(request: Request):
     accounts = get_accounts_list()
     print(accounts)
     return templates.TemplateResponse(name='accounts.html', context={'request': request,
-                                                                       'cur_category': [],
-                                                                       'categories': categories,
-                                                                       'accounts': accounts,
-                                                                       })
+                                                                     'cur_category': [],
+                                                                     'categories': categories,
+                                                                     'accounts': accounts,
+                                                                     })
 
 
 @admin_router.get('/account/add')
-async def page_add_account():
-    ...
+async def page_add_account(request: Request):
+    categories = get_categories()
+    providers = get_providers_list()
+    currencies = get_currency_list()
+    print(providers)
+    print(currencies)
+    return templates.TemplateResponse(name='add_account.html', context={'request': request,
+                                                                        'cur_category': [],
+                                                                        'categories': categories,
+                                                                        'providers': providers,
+                                                                        'currencies': currencies,
+                                                                        })
 
 
 @admin_router.post('/account/add')
 async def add_account(
         number: str = Form(),
         balance: float = Form(),
-        currency_id: int = Form(),
         provider_id: int = Form(),
+        currency_id: int = Form(),
 ):
-    ...
+    account_dto = AccountAddDTO.model_validate({
+        'number': number,
+        'balance': balance,
+        'provider_id': provider_id,
+        'currency_id': currency_id,
+    })
+    try:
+        add_account_orm(account_dto)
+    except ExistORMObject as e:
+        return {'detail': e.text}
+    return RedirectResponse('/admin/account', status_code=status.HTTP_303_SEE_OTHER)

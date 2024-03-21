@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <form action="#" method="post">
+            <div class="col-md">
+                <label for="number" class="form-label label">Номер особового рахунку</label>
+                <input type="text" class="form-control" id="number" name="number">
+
+                <label for="balance" class="form-label label">Баланс</label>
+                <input type="text" class="form-control" id="balance" name="balance">
+
+                <label for="provider" class="form-label label">Оператор</label>
+                <select class="form-select" id="provider" name="provider_id">
+                    <option selected>Виберіть зі списку оператора...</option>
+                    {% for provider in providers %}
+                        <option value="{{provider.id}}">{{provider.name}} {{provider.id}}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="currency" class="form-label label">Валюта</label>
+                <select class="form-select" id="currency" name="currency_id">
+                    <option selected>Виберіть зі списку валюту...</option>
+                    {% for currency in currencies %}
+                        <option value="{{currency.id}}">{{currency.name}} ({{currency.code}})</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-outline-primary btn-safe" id="Paymentbtn">Зберегти</button>
+        </form>
+    </div>
+</div>
+
+</div>
+
+{% endblock %}
+
