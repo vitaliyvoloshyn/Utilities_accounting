@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-xl">
+    <h4>Список валют</h4>
+    <table class="table table-bordered text-center">
+        <tr class="table-primary">
+            <th>Назва</th>
+            <th>Код</th>
+        </tr>
+        {% for currency in currencies %}
+            <tr>
+                <td>{{currency.name}}</td>
+                <td>{{currency.code}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<div class="row">
+    <div class="col-xl-2">
+        <a class="btn btn-outline-primary btn-pay" href="/admin/currency/add" role="button">Додати валюту</a>
+    </div>
+</div>
+{% endblock %}

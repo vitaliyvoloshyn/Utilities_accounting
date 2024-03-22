@@ -151,8 +151,6 @@ async def page_add_account(request: Request):
     categories = get_categories()
     providers = get_providers_list()
     currencies = get_currency_list()
-    print(providers)
-    print(currencies)
     return templates.TemplateResponse(name='add_account.html', context={'request': request,
                                                                         'cur_category': [],
                                                                         'categories': categories,
@@ -179,3 +177,22 @@ async def add_account(
     except ExistORMObject as e:
         return {'detail': e.text}
     return RedirectResponse('/admin/account', status_code=status.HTTP_303_SEE_OTHER)
+
+@admin_router.get('/currency')
+def currency_list_view(request: Request):
+    categories = get_categories()
+    currencies = get_currency_list()
+    return templates.TemplateResponse(name='currencies.html', context={'request': request,
+                                                                        'cur_category': [],
+                                                                        'categories': categories,
+                                                                        'currencies': currencies,
+                                                                        })
+
+
+@admin_router.get('/currency/add')
+def currency_add_page_view(request: Request):
+    ...
+
+@admin_router.post('/currency/add')
+def currency_add_view():
+    ...
