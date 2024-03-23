@@ -7,7 +7,7 @@ from exceptions import ExistORMObject
 from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit, Account, Currency
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, CounterRelDTO, ProviderDTO, ProviderRelDTO, \
     UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO, AccountRelDTO, CurrencyDTO, \
-    AccountDTO, AccountAddDTO
+    AccountDTO, AccountAddDTO, CurrencyAddDTO
 
 session = get_db().get_session()
 
@@ -132,3 +132,12 @@ def _exist_account_in_provider(provider_id: int, session: session = session) -> 
         if res:
             return True
         return False
+
+
+
+def add_currency_orm(currency: CurrencyAddDTO):
+    """Додає валюту в бд"""
+    currency_orm = Currency(**currency.dict())
+    with session() as conn:
+        conn.add(currency_orm)
+        conn.commit()

@@ -106,10 +106,13 @@ class PaymentRelDTO(BaseModel):
     account: "AccountDTO"
 
 
-class CurrencyDTO(BaseModel):
-    id: int
+
+class CurrencyAddDTO(BaseModel):
     name: str
     code: str = Field(min_items=3, max_items=3)
+
+class CurrencyDTO(CurrencyAddDTO):
+    id: int
 
 
 class CurrencyRelDTO(CurrencyDTO):

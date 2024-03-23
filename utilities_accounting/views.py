@@ -9,11 +9,11 @@ from starlette.responses import RedirectResponse
 
 from exceptions import ExistORMObject
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO, CategoryAddDTO, CounterAddDTO, \
-    ProviderAddDTO, CurrencyDTO, AccountAddDTO
+    ProviderAddDTO, CurrencyDTO, AccountAddDTO, CurrencyAddDTO
 from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
     get_unit_list, \
     add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm, get_accounts_list, \
-    get_currency_list, add_account_orm
+    get_currency_list, add_account_orm, add_currency_orm
 
 router = APIRouter(prefix='/category', tags=['Main app'])
 index_router = APIRouter(tags=['Index'])
@@ -148,6 +148,7 @@ async def get_account(request: Request):
 
 @admin_router.get('/account/add')
 async def page_add_account(request: Request):
+    """Сторінка додавання особового рахунку"""
     categories = get_categories()
     providers = get_providers_list()
     currencies = get_currency_list()
@@ -178,21 +179,45 @@ async def add_account(
         return {'detail': e.text}
     return RedirectResponse('/admin/account', status_code=status.HTTP_303_SEE_OTHER)
 
+
 @admin_router.get('/currency')
 def currency_list_view(request: Request):
+    """Сторінка зі списком особових рахунків"""
     categories = get_categories()
     currencies = get_currency_list()
     return templates.TemplateResponse(name='currencies.html', context={'request': request,
-                                                                        'cur_category': [],
-                                                                        'categories': categories,
-                                                                        'currencies': currencies,
-                                                                        })
+                                                                       'cur_category': [],
+                                                                       'categories': categories,
+                                                                       'currencies': currencies,
+                                                                       })
 
 
 @admin_router.get('/currency/add')
 def currency_add_page_view(request: Request):
-    ...
+    """Сторінка додавання особового рахунку"""
+    categories = get_categories()
+    providers = get_providers_list()
+    currencies = get_currency_list()
+    return templates.TemplateResponse(name='add_currency_form.html', context={'request': request,
+                                                                              'cur_category': [],
+                                                                              'categories': categories,
+                                                                              'providers': providers,
+                                                                              'currencies': currencies,
+                                                                              })
+
 
 @admin_router.post('/currency/add')
-def currency_add_view():
-    ...
+def currency_add_post(
+        name: str = Form(),
+        code: str = Form(),
+):
+    """POST-запит на додання особового рахунку, передання інформації в БД"""
+    currency_dto = CurrencyAddDTO.model_validate({
+        'name': name,
+        'code': code,
+    })
+    try:
+        add_currency_orm(currency_dto)
+    except IntegrityError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/currency', status_code=status.HTTP_303_SEE_OTHER)
