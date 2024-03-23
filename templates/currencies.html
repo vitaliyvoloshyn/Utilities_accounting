@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="col-xl">
+<div class="col-xl-8">
     <h4>Список валют</h4>
-    <table class="table table-bordered text-center">
+    <table class="table table-bordered text-center align-middle">
         <tr class="table-primary">
             <th>Назва</th>
             <th>Код</th>
+            <th>Редагування</th>
+            <th>Видалення</th>
         </tr>
         {% for currency in currencies %}
             <tr>
-                <td>{{currency.name}}</td>
-                <td>{{currency.code}}</td>
+                <td class="col-sm-4">{{currency.name}}</td>
+                <td class="col-sm-1">{{currency.code}}</td>
+                <td class="col-sm-2"><a class="btn btn-outline-primary" href="/admin/currency/{{currency.id}}" role="button">Редагувати</a></td>
+                <td class="col-sm-2"><a class="btn btn-outline-danger" href="/admin/currency/{{currency.id}}/delete" role="button">Видалити</a></td>
             </tr>
         {% endfor %}
     </table>

@@ -1,4 +1,4 @@
-from sqlalchemy import select, text, and_
+from sqlalchemy import select, text, and_, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload, joinedload
 
@@ -113,6 +113,15 @@ def get_currency_list(session: session = session):
         return res_dto
 
 
+def get_currency_by_id(pk: int, session: session = session):
+    """Повертає CurrencyDTO об'єкт без відношень"""
+    query = select(Currency).where(Currency.id == pk)
+    with session() as conn:
+        res_orm = conn.execute(query).scalar()
+        res_dto = CurrencyDTO.model_validate(res_orm, from_attributes=True)
+        return res_dto
+
+
 def add_account_orm(account: AccountAddDTO):
     """Додає о/р в бд"""
     if _exist_account_in_provider(account.provider_id):
@@ -134,10 +143,25 @@ def _exist_account_in_provider(provider_id: int, session: session = session) -> 
         return False
 
 
-
-def add_currency_orm(currency: CurrencyAddDTO):
+def add_currency_orm(currency: CurrencyAddDTO, session: session = session):
     """Додає валюту в бд"""
     currency_orm = Currency(**currency.dict())
     with session() as conn:
         conn.add(currency_orm)
+        conn.commit()
+
+
+def currency_delete_orm(pk: int, session: session = session):
+    """Видаляє валюту по id"""
+    with session() as conn:
+        currency_orm = conn.execute(select(Currency).where(Currency.id == pk)).scalar()
+        conn.delete(currency_orm)
+        conn.commit()
+
+
+def currency_update(currency: CurrencyDTO, session: session = session):
+    """Оновлення валюти"""
+    stmt = update(Currency).where(Currency.id == currency.id).values(**currency.dict())
+    with session() as conn:
+        conn.execute(stmt)
         conn.commit()

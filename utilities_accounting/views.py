@@ -2,7 +2,9 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, Body, Form, Depends
 from fastapi.templating import Jinja2Templates
+from pydantic_core import ValidationError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import UnmappedInstanceError
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
@@ -13,7 +15,7 @@ from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO
 from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
     get_unit_list, \
     add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm, get_accounts_list, \
-    get_currency_list, add_account_orm, add_currency_orm
+    get_currency_list, add_account_orm, add_currency_orm, currency_delete_orm, get_currency_by_id, currency_update
 
 router = APIRouter(prefix='/category', tags=['Main app'])
 index_router = APIRouter(tags=['Index'])
@@ -201,8 +203,8 @@ def currency_add_page_view(request: Request):
     return templates.TemplateResponse(name='add_currency_form.html', context={'request': request,
                                                                               'cur_category': [],
                                                                               'categories': categories,
-                                                                              'providers': providers,
-                                                                              'currencies': currencies,
+                                                                              # 'providers': providers,
+                                                                              # 'currencies': currencies,
                                                                               })
 
 
@@ -213,11 +215,53 @@ def currency_add_post(
 ):
     """POST-запит на додання особового рахунку, передання інформації в БД"""
     currency_dto = CurrencyAddDTO.model_validate({
-        'name': name,
-        'code': code,
+        'name': name.capitalize(),
+        'code': code.upper(),
     })
     try:
         add_currency_orm(currency_dto)
+    except IntegrityError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/currency', status_code=status.HTTP_303_SEE_OTHER)
+
+
+@admin_router.get('/currency/{pk}/delete')
+def currency_delete(pk: int):
+    """Видалення валюти з БД"""
+
+    try:
+        currency_delete_orm(pk)
+    except UnmappedInstanceError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/currency', status_code=status.HTTP_303_SEE_OTHER)
+
+
+@admin_router.get('/currency/{pk}/')
+def currency_update_form(request: Request, pk: int):
+    """Форма редагування валюти"""
+    categories = get_categories()
+    currency = get_currency_by_id(pk)
+    return templates.TemplateResponse(name='currency_update.html', context={'request': request,
+                                                                            'cur_category': [],
+                                                                            'categories': categories,
+                                                                            'currency': currency,
+                                                                            })
+
+
+@admin_router.post('/currency/{pk}/')
+def currency_update_form(pk: int, name: str = Form(), code: str = Form()):
+    """POST-запит на редагування валюти"""
+    try:
+        currency_dto = CurrencyDTO.model_validate({
+            'id': pk,
+            'name': name,
+            'code': code.upper(),
+        })
+    except ValidationError as e:
+        return {'detail': e.errors()}
+
+    try:
+        currency_update(currency_dto)
     except IntegrityError as e:
         return {'detail': e}
     return RedirectResponse('/admin/currency', status_code=status.HTTP_303_SEE_OTHER)
