@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-xl-10">
+    <h4>Список валют</h4>
+    <table class="table table-bordered text-center align-middle">
+        <tr class="table-primary">
+            <th>Назва</th>
+            <th>Код</th>
+            <th>Редагування</th>
+            <th>Видалення</th>
+        </tr>
+        {% for counter in counters %}
+            <tr>
+                <td class="col-sm-4">{{counter.name}}</td>
+                <td class="col-sm-1">{{currency.unit.value}}</td>
+                <td class="col-sm-2"><a class="btn btn-outline-primary" href="/admin/counter/{{counter.id}}" role="button">Редагувати</a></td>
+                <td class="col-sm-2"><a class="btn btn-outline-danger" href="/admin/counter/{{counter.id}}/delete" role="button">Видалити</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<div class="row">
+    <div class="col-xl-2">
+        <a class="btn btn-outline-primary btn-pay" href="/admin/counter/add" role="button">Додати лічильник</a>
+    </div>
+</div>
+{% endblock %}

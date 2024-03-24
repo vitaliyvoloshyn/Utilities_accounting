@@ -99,20 +99,15 @@ accounts = [
     Account(number='j5673456', balance=23.4, provider_id=7, currency_id=1),
 ]
 
-units = [
-    Unit(value='кВт*год'),
-    Unit(value='м3'),
-]
-
 
 
 def add_data(session):
     with session() as conn:
         conn.add_all(currencies)
         conn.add_all(units)
-        # conn.add_all(categories)
-        # conn.add_all(counters)
-        # conn.add_all(indicators)
-        # conn.add_all(providers)
-        # conn.add_all(accounts)
+        conn.add_all(categories)
+        conn.add_all(counters)
+        conn.add_all(indicators)
+        conn.add_all(providers)
+        conn.add_all(accounts)
         conn.commit()

@@ -5,7 +5,6 @@ from sqlalchemy import String, ForeignKey, func, Enum as sa_Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 
-
 class Base(DeclarativeBase):
     pass
 
@@ -43,7 +42,7 @@ class Counter(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
-    date: Mapped[datetime] = mapped_column(server_default=func.current_date())
+    # date: Mapped[datetime] = mapped_column(server_default=func.current_date())
     # deleted: Mapped[bool] = mapped_column(server_default='False')
     unit_id: Mapped[int] = mapped_column(ForeignKey('unit.id'))
     categories: Mapped[List['Category']] = relationship(back_populates='counters', secondary='category_counter')

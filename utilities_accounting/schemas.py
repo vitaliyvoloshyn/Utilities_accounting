@@ -42,6 +42,7 @@ class ProviderRelDTO(ProviderDTO):
 
 class CounterAddDTO(BaseModel):
     name: str
+    unit_id: int
 
 
 class CounterDTO(CounterAddDTO):
@@ -50,6 +51,13 @@ class CounterDTO(CounterAddDTO):
 
 class CounterUnitRelDTO(CounterDTO):
     unit: 'UnitReadDTO'
+
+
+class CounterCategoryDTO(BaseModel):
+    id: int
+    name: str
+    unit: 'UnitReadDTO'
+    categories: List['CategoryDTO']
 
 
 class CounterRelDTO(CounterDTO):

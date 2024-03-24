@@ -10,17 +10,20 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 from exceptions import ExistORMObject
+from utilities_accounting.models import Account
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO, CategoryAddDTO, CounterAddDTO, \
-    ProviderAddDTO, CurrencyDTO, AccountAddDTO, CurrencyAddDTO, UnitReadDTO
+    ProviderAddDTO, CurrencyDTO, AccountAddDTO, CurrencyAddDTO, UnitReadDTO, AccountDTO, AccountRelDTO
 from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
     add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm, get_accounts_list, \
     get_currency_list, add_account_orm, add_currency_orm, currency_delete_orm, get_currency_by_id, currency_update, \
     units_get_list, unit_add_orm, unit_delete_orm, unit_get_by_id, unit_update
+from utilities_accounting.repositories import BaseRepository
 
 router = APIRouter(prefix='/category', tags=['Main app'])
 index_router = APIRouter(tags=['Index'])
 admin_router = APIRouter(prefix='/admin', tags=['Admin'])
 templates = Jinja2Templates(directory='templates')
+account_repo = BaseRepository(model=Account, dto_read_model=AccountDTO, dto_add_model=AccountAddDTO, dto_rel_model=AccountRelDTO)
 
 
 @index_router.get("/")
@@ -137,8 +140,7 @@ async def add_category_post(categoryName: str = Form(),
 @admin_router.get('/account')
 async def get_account(request: Request):
     categories = get_categories_counters()
-    accounts = get_accounts_list()
-    print(accounts)
+    accounts = account_repo.get_list_objects()
     return templates.TemplateResponse(name='accounts.html', context={'request': request,
                                                                      'cur_category': [],
                                                                      'categories': categories,
@@ -264,13 +266,91 @@ def currency_update_form(pk: int, name: str = Form(), code: str = Form()):
         return {'detail': e}
     return RedirectResponse('/admin/currency', status_code=status.HTTP_303_SEE_OTHER)
 
-
+# CRUD Unit
 # **********************************************************************************************************************
 @admin_router.get('/unit')
 def unit_list_view(request: Request):
     """Сторінка зі списком одиниць вимірювання"""
     categories = get_categories()
     units = units_get_list()
+    return templates.TemplateResponse(name='units.html', context={'request': request,
+                                                                  'cur_category': [],
+                                                                  'categories': categories,
+                                                                  'units': units,
+                                                                  })
+
+
+@admin_router.get('/unit/add')
+def unit_add_page_view(request: Request):
+    """Сторінка додавання одиниць вимірювання"""
+    categories = get_categories()
+    return templates.TemplateResponse(name='unit_add_form.html', context={'request': request,
+                                                                          'cur_category': [],
+                                                                          'categories': categories,
+                                                                          })
+
+
+@admin_router.post('/unit/add')
+def unit_add_post(
+        value: str = Form(),
+):
+    """POST-запит на додання одиниці вимірювання, передання інформації в БД"""
+    unit_dto = UnitAddDTO.model_validate({'value': value})
+    try:
+        unit_add_orm(unit_dto)
+    except IntegrityError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
+
+
+@admin_router.get('/unit/{pk}/delete')
+def unit_delete(pk: int):
+    """Видалення одиниці вимірювання з БД"""
+
+    try:
+        unit_delete_orm(pk)
+    except UnmappedInstanceError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
+
+
+@admin_router.get('/unit/{pk}/')
+def unit_update_form(request: Request, pk: int):
+    """Форма редагування одиниці вимірювання"""
+    categories = get_categories()
+    unit = unit_get_by_id(pk)
+    return templates.TemplateResponse(name='unit_update.html', context={'request': request,
+                                                                        'cur_category': [],
+                                                                        'categories': categories,
+                                                                        'unit': unit,
+                                                                        })
+
+
+@admin_router.post('/unit/{pk}/')
+def unit_update_post(pk: int, value: str = Form()):
+    """POST-запит на редагування одиниці вимірювання"""
+    try:
+        unit_dto = UnitReadDTO.model_validate({
+            'id': pk,
+            'value': value,
+        })
+    except ValidationError as e:
+        return {'detail': e.errors()}
+
+    try:
+        unit_update(unit_dto)
+    except IntegrityError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
+
+
+# Views Tariff
+# **********************************************************************************************************************
+@admin_router.get('/tariff')
+def tariff_list_view(request: Request):
+    """Сторінка зі списком тарифів"""
+    categories = get_categories()
+    tariffs = units_get_list()
     return templates.TemplateResponse(name='units.html', context={'request': request,
                                                                   'cur_category': [],
                                                                   'categories': categories,
