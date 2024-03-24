@@ -4,7 +4,6 @@ from typing import List
 from sqlalchemy import String, ForeignKey, func, Enum as sa_Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
-from utilities_accounting.schemas import UnitEnum
 
 
 class Base(DeclarativeBase):
@@ -118,7 +117,7 @@ class Payment(Base):
 class Currency(Base):
     __tablename__ = 'currency'
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(unique=True)
     code: Mapped[str] = mapped_column(String(3))
     accounts: Mapped[List['Account']] = relationship(back_populates='currency')
 

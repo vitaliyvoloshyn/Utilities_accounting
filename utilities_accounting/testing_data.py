@@ -99,128 +99,20 @@ accounts = [
     Account(number='j5673456', balance=23.4, provider_id=7, currency_id=1),
 ]
 
-def insert_data_in_currency(session):
-    stmt = insert(table=Currency).values([
-        {'name': 'Українська гривня', 'code': 'UAH'},
-        {'name': 'Американський долар', 'code': 'USD'},
-        {'name': 'Євро', 'code': 'EUR'},
-    ])
-    with session() as conn:
-        conn.execute(stmt)
-        conn.commit()
+units = [
+    Unit(value='кВт*год'),
+    Unit(value='м3'),
+]
 
-
-def insert_data_in_counter(session):
-    stmt = insert(table=Counter).values([
-        {'name': 'Електролічильник', 'category_id': 1},
-        {'name': 'Лічильник холодної води', 'category_id': 2},
-        {'name': 'Лічильник гарячої води', 'category_id': 2},
-        {'name': 'Лічильник гарячої води', 'category_id': 4},
-        {'name': 'Газовий лічильник', 'category_id': 3},
-    ])
-
-    with session() as conn:
-        conn.execute(stmt)
-        conn.commit()
-
-
-def insert_data_in_indicator(session):
-    stmt = insert(table=Indicator).values([
-        {"name": "Електролічильник", "value": "4873", "provider_id": "1"},
-        {"name": "Лічильник холодної води", "value": "471", "provider_id": "2"},
-        {"name": "Лічильник гарячої води", "value": "275", "provider_id": "2"},
-        {"name": "Лічильник гарячої води", "value": "275", "provider_id": "4"},
-        {"name": "Газовий лічильник", "value": "117", "provider_id": "3"},
-    ])
-    with session() as conn:
-        conn.execute(stmt)
-        conn.commit()
-
-
-def insert_data_in_account(session):
-    stmt = insert(table=Account).values([
-        {"number": "535345", "balance": "3", "provider_id": "1"},
-        {"number": "345345", "balance": "234", "provider_id": "2"},
-        {"number": "3453453", "balance": "23", "provider_id": "3"},
-        {"number": "935374", "balance": "64", "provider_id": "4"},
-        {"number": "549362", "balance": "25", "provider_id": "5"},
-        {"number": "93574", "balance": "98", "provider_id": "6"},
-        {"number": "498432", "balance": "4", "provider_id": "7"},
-    ])
-    with session() as conn:
-        conn.execute(stmt)
-        conn.commit()
-
-
-def insert_data_in_tariff(session):
-    instance_list = [
-        Tariff(value=2.64, provider_id=1),
-        Tariff(value=2.64, provider_id=2),
-        Tariff(value=2.64, provider_id=3),
-        Tariff(value=2.64, provider_id=4),
-        Tariff(value=2.64, provider_id=5),
-        Tariff(value=2.64, provider_id=6),
-        Tariff(value=2.64, provider_id=7),
-    ]
-    with session() as conn:
-        conn.add_all(instance_list)
-        conn.commit()
-
-
-def insert_data_in_payment(session):
-    instance_list = [
-        Payment(value=264, provider_id=1),
-        Tariff(value=164, provider_id=2),
-        Tariff(value=294, provider_id=3),
-        Tariff(value=236, provider_id=4),
-        Tariff(value=44, provider_id=5),
-        Tariff(value=24, provider_id=6),
-        Tariff(value=64, provider_id=7),
-    ]
-    with session() as conn:
-        conn.add_all(instance_list)
-        conn.commit()
-
-
-# def get_tariff(id:int):
-#     query = text("select t.value from tariff t join provider p on t.provider_id = p.id where p.name = 'ПОЖ'")
-#     with session() as conn:
-#         res = conn.execute(query).scalar()
-#         print(res)
-# def get_categories():
-#     query = select(Indicator).options(selectinload(Indicator.provider)).limit(2)
-#     with session() as conn:
-#         result = conn.execute(query)
-#         result_orm = result.scalars().all()
-#         print(f"11 - {result_orm}")
-#         result_dto = [IndicatorRelDTO.model_validate(row, from_attributes=True) for row in result_orm]
-#         print(result_dto)
 
 
 def add_data(session):
     with session() as conn:
-        conn.add_all(categories)
         conn.add_all(currencies)
-        conn.add_all(counters)
-        conn.add_all(indicators)
-        conn.add_all(providers)
-        conn.add_all(accounts)
+        conn.add_all(units)
+        # conn.add_all(categories)
+        # conn.add_all(counters)
+        # conn.add_all(indicators)
+        # conn.add_all(providers)
+        # conn.add_all(accounts)
         conn.commit()
-    # insert_data_to_category(session)
-    # insert_data_in_provider(session)
-    # insert_data_in_currency(session)
-    # insert_data_in_counter(session)
-    # insert_data_in_indicator(session)
-    # insert_data_in_account(session)
-    # insert_data_in_tariff(session)
-    # insert_data_in_payment(session)
-    # get_tariff(1)
-    # get_categories()
-
-
-def my_select(session):
-    query = select(Category).join(CategoryCounter).where(CategoryCounter.counter_id == 3)
-    with session() as conn:
-        res = conn.execute(query).scalars().all()
-        conn.commit()
-        print(res)

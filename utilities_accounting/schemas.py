@@ -106,10 +106,10 @@ class PaymentRelDTO(BaseModel):
     account: "AccountDTO"
 
 
-
 class CurrencyAddDTO(BaseModel):
     name: str
     code: str = Field(min_items=3, max_items=3)
+
 
 class CurrencyDTO(CurrencyAddDTO):
     id: int
@@ -119,15 +119,11 @@ class CurrencyRelDTO(CurrencyDTO):
     accounts: List['CurrencyDTO']
 
 
-class UnitEnum(Enum):
-    ELECTRICITY = 'кВт*год'
-    VOLUME = 'м3'
-
-
-class UnitReadDTO(BaseModel):
-    id: int
+class UnitAddDTO(BaseModel):
+    """Додання одиниці вимірбвання"""
     value: str
 
 
-class UnitAddDTO(BaseModel):
-    value: UnitEnum
+class UnitReadDTO(UnitAddDTO):
+    """Одєкт одиниці вимірювання без відношень"""
+    id: int

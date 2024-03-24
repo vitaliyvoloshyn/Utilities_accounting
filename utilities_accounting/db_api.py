@@ -7,7 +7,7 @@ from exceptions import ExistORMObject
 from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit, Account, Currency
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, CounterRelDTO, ProviderDTO, ProviderRelDTO, \
     UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO, AccountRelDTO, CurrencyDTO, \
-    AccountDTO, AccountAddDTO, CurrencyAddDTO
+    AccountDTO, AccountAddDTO, CurrencyAddDTO, UnitAddDTO
 
 session = get_db().get_session()
 
@@ -47,14 +47,6 @@ def get_providers_list(session: session = session):
     with session() as conn:
         res_orm = conn.execute(query).scalars().all()
         res_dto = [ProviderRelDTO.model_validate(row, from_attributes=True) for row in res_orm]
-        return res_dto
-
-
-def get_unit_list(session: session = session):
-    query = select(Unit)
-    with session() as conn:
-        res_orm = conn.execute(query).scalars().all()
-        res_dto = [UnitReadDTO.model_validate(row, from_attributes=True) for row in res_orm]
         return res_dto
 
 
@@ -162,6 +154,51 @@ def currency_delete_orm(pk: int, session: session = session):
 def currency_update(currency: CurrencyDTO, session: session = session):
     """Оновлення валюти"""
     stmt = update(Currency).where(Currency.id == currency.id).values(**currency.dict())
+    with session() as conn:
+        conn.execute(stmt)
+        conn.commit()
+
+
+def units_get_list(session: session = session):
+    """Повертає UnitReadDTO без відношень
+        поля:
+        id,
+        name"""
+    query = select(Unit)
+    with session() as conn:
+        res_orm = conn.execute(query).scalars().all()
+        res_dto = [UnitReadDTO.model_validate(row, from_attributes=True) for row in res_orm]
+        return res_dto
+
+
+def unit_add_orm(unit: UnitAddDTO, session: session = session):
+    """Додання одиниці вимірювання в БД"""
+    unit_orm = Unit(**unit.dict())
+    with session() as conn:
+        conn.add(unit_orm)
+        conn.commit()
+
+
+def unit_delete_orm(pk: int, session: session = session):
+    """Видаляє одиницю вимірювання по id"""
+    with session() as conn:
+        unit_orm = conn.execute(select(Unit).where(Unit.id == pk)).scalar()
+        conn.delete(unit_orm)
+        conn.commit()
+
+
+def unit_get_by_id(pk: int, session: session = session):
+    """Повертає UnitReadDTO об'єкт без відношень"""
+    query = select(Unit).where(Unit.id == pk)
+    with session() as conn:
+        res_orm = conn.execute(query).scalar()
+        res_dto = UnitReadDTO.model_validate(res_orm, from_attributes=True)
+        return res_dto
+
+
+def unit_update(unit: UnitReadDTO, session: session = session):
+    """Оновлення одиницю вимірювання"""
+    stmt = update(Unit).where(Unit.id == unit.id).values(**unit.dict())
     with session() as conn:
         conn.execute(stmt)
         conn.commit()
