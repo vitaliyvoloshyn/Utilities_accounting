@@ -7,6 +7,8 @@ from sqlalchemy.orm import selectinload
 from database import get_db
 from utilities_accounting.models import Base, Category, Counter
 
+from sqlalchemy.orm.session import sessionmaker
+
 
 class BaseRepository:
     session = get_db().get_session()
@@ -21,6 +23,16 @@ class BaseRepository:
         self.dto_read_model = dto_read_model
         self.dto_rel_model = dto_rel_model
         self.session = self.__class__.session()
+
+    @staticmethod
+    def context_session(session):
+        """Декоратор, який відкриває сессію в контекстному менеджері для функцій репозиторію"""
+        def inner_func(func: callable):
+            def wrapper(*args):
+                with session() as conn:
+                    func(*args, conn)
+            return wrapper
+        return inner_func
 
     def get_object_by_id(self, pk: int, model: Type[Base] = None, model_dto: Type[BaseModel] = None):
         if not model:
@@ -42,11 +54,6 @@ class BaseRepository:
         list_obj_orm = self.session.execute(select(self.orm_model)).scalars().all()
         return self._model_validate(list_obj_orm, dto_model)
 
-    def add_object(self, dto_model: BaseModel):
-        orm_obj = self.orm_model(**dto_model.dict())
-        self.session.add(orm_obj)
-        self.session.commit()
-
     def add_counter(self, counter: Type[BaseModel], category_id: int):
         category_orm = self.session.execute(select(Category).where(Category.id == category_id)).scalar()
         counter_orm = Counter(**counter.dict())
@@ -63,4 +70,10 @@ class BaseRepository:
         if isinstance(orm_obj, list):
             return [dto_model.model_validate(row, from_attributes=True) for row in orm_obj]
         return dto_model.model_validate(orm_obj, from_attributes=True)
+
+    @context_session(session)
+    def add_object(self, dto_model: BaseModel, session=None):
+        orm_obj = self.orm_model(**dto_model.dict())
+        session.add(orm_obj)
+        session.commit()
 

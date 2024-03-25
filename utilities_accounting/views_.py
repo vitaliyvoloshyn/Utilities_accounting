@@ -10,7 +10,7 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 from exceptions import ExistORMObject
-from utilities_accounting.models import Account
+from utilities_accounting.models import Account, Unit
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO, CategoryAddDTO, CounterAddDTO, \
     ProviderAddDTO, CurrencyDTO, AccountAddDTO, CurrencyAddDTO, UnitReadDTO, AccountDTO, AccountRelDTO
 from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
@@ -290,6 +290,9 @@ def unit_add_page_view(request: Request):
                                                                           })
 
 
+repo = BaseRepository(Unit, UnitAddDTO)
+
+
 @admin_router.post('/unit/add')
 def unit_add_post(
         value: str = Form(),
@@ -297,7 +300,7 @@ def unit_add_post(
     """POST-запит на додання одиниці вимірювання, передання інформації в БД"""
     unit_dto = UnitAddDTO.model_validate({'value': value})
     try:
-        unit_add_orm(unit_dto)
+        repo.add_object(unit_dto)
     except IntegrityError as e:
         return {'detail': e}
     return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
@@ -326,83 +329,6 @@ def unit_update_form(request: Request, pk: int):
                                                                         })
 
 
-@admin_router.post('/unit/{pk}/')
-def unit_update_post(pk: int, value: str = Form()):
-    """POST-запит на редагування одиниці вимірювання"""
-    try:
-        unit_dto = UnitReadDTO.model_validate({
-            'id': pk,
-            'value': value,
-        })
-    except ValidationError as e:
-        return {'detail': e.errors()}
-
-    try:
-        unit_update(unit_dto)
-    except IntegrityError as e:
-        return {'detail': e}
-    return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
-
-
-# Views Tariff
-# **********************************************************************************************************************
-@admin_router.get('/tariff')
-def tariff_list_view(request: Request):
-    """Сторінка зі списком тарифів"""
-    categories = get_categories()
-    tariffs = units_get_list()
-    return templates.TemplateResponse(name='units.html', context={'request': request,
-                                                                  'cur_category': [],
-                                                                  'categories': categories,
-                                                                  'units': units,
-                                                                  })
-
-
-@admin_router.get('/unit/add')
-def unit_add_page_view(request: Request):
-    """Сторінка додавання одиниць вимірювання"""
-    categories = get_categories()
-    return templates.TemplateResponse(name='unit_add_form.html', context={'request': request,
-                                                                          'cur_category': [],
-                                                                          'categories': categories,
-                                                                          })
-
-
-@admin_router.post('/unit/add')
-def unit_add_post(
-        value: str = Form(),
-):
-    """POST-запит на додання одиниці вимірювання, передання інформації в БД"""
-    unit_dto = UnitAddDTO.model_validate({'value': value})
-    try:
-        unit_add_orm(unit_dto)
-    except IntegrityError as e:
-        return {'detail': e}
-    return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
-
-
-@admin_router.get('/unit/{pk}/delete')
-def unit_delete(pk: int):
-    """Видалення одиниці вимірювання з БД"""
-
-    try:
-        unit_delete_orm(pk)
-    except UnmappedInstanceError as e:
-        return {'detail': e}
-    return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
-
-
-@admin_router.get('/unit/{pk}/')
-def unit_update_form(request: Request, pk: int):
-    """Форма редагування одиниці вимірювання"""
-    categories = get_categories()
-    unit = unit_get_by_id(pk)
-    return templates.TemplateResponse(name='unit_update.html', context={'request': request,
-                                                                        'cur_category': [],
-                                                                        'categories': categories,
-                                                                        'unit': unit,
-                                                                        })
-
 
 @admin_router.post('/unit/{pk}/')
 def unit_update_post(pk: int, value: str = Form()):
@@ -416,7 +342,8 @@ def unit_update_post(pk: int, value: str = Form()):
         return {'detail': e.errors()}
 
     try:
-        unit_update(unit_dto)
+        repo.add_object(unit_dto)
     except IntegrityError as e:
         return {'detail': e}
     return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
+
