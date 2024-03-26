@@ -85,8 +85,16 @@ class BaseRepository:
                 obj_orm = session.execute(select(self.orm_model).where(self.orm_model.id == pk)).scalar()
             else:
                 obj_orm = session.execute(select(self.orm_model)).scalars().all()
-            print(obj_orm)
             return self.__validate_orm_to_schema(obj_orm, self.dto_read_model)
+
+    # def __session_get_with_join(self, join_model: Base,pk: Optional[int] = None):
+    #     """Витягує дані з таблиці БД. Якщо вказаний id - повертає один запис, якщо не вказаний - список"""
+    #     with self.session() as session:
+    #         if pk:
+    #             obj_orm = session.execute(select(self.orm_model).join(join_model).where(self.orm_model.id == pk)).scalar()
+    #         else:
+    #             obj_orm = session.execute(select(self.orm_model)).join(join_model).scalars().all()
+    #         return self.__validate_orm_to_schema(obj_orm, self.dto_read_model)
 
     def __validate_dict_to_schema(self, data: dict) -> Type[BaseModel]:
         """Відповідає за валідацію даних в схему. На вхід приймає словник"""

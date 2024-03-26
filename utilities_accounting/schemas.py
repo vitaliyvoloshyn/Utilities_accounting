@@ -40,28 +40,11 @@ class ProviderRelDTO(ProviderDTO):
     category: "CategoryDTO"
 
 
-class CounterAddDTO(BaseModel):
-    name: str
-    unit_id: int
-
-
-class CounterDTO(CounterAddDTO):
-    id: int
-
-
-class CounterUnitRelDTO(CounterDTO):
-    unit: 'UnitDTO'
-
-
 class CounterCategoryDTO(BaseModel):
     id: int
     name: str
     unit: 'UnitDTO'
     categories: List['CategoryDTO']
-
-
-class CounterRelDTO(CounterDTO):
-    indicators: List['IndicatorDTO']
 
 
 class IndicatorDTO(BaseModel):
@@ -127,6 +110,9 @@ class CurrencyRelDTO(CurrencyDTO):
     accounts: List['CurrencyDTO']
 
 
+# ___________________________***********************__________________________
+
+
 class UnitAddDTO(BaseModel):
     """Додання одиниці вимірбвання"""
     value: str
@@ -135,3 +121,19 @@ class UnitAddDTO(BaseModel):
 class UnitDTO(UnitAddDTO):
     """Одєкт одиниці вимірювання без відношень"""
     id: int
+
+
+class CounterAddDTO(BaseModel):
+    name: str
+    unit_id: int
+
+
+class CounterDTO(CounterAddDTO):
+    id: int
+
+
+class CounterRelDTO(CounterDTO):
+    unit: 'UnitDTO'
+    category: List['CategoryDTO']
+    indicators: List['IndicatorDTO']
+
