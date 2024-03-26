@@ -6,7 +6,7 @@ from database import get_db
 from exceptions import ExistORMObject
 from utilities_accounting.models import Category, Provider, Counter, CategoryCounter, Unit, Account, Currency
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, CounterRelDTO, ProviderDTO, ProviderRelDTO, \
-    UnitReadDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO, AccountRelDTO, CurrencyDTO, \
+    UnitDTO, CategoryAddDTO, CounterAddDTO, CategoryCounterRelDTO, ProviderAddDTO, AccountRelDTO, CurrencyDTO, \
     AccountDTO, AccountAddDTO, CurrencyAddDTO, UnitAddDTO
 
 session = get_db().get_session()
@@ -46,6 +46,7 @@ def get_providers_list(session: session = session):
     query = select(Provider)
     with session() as conn:
         res_orm = conn.execute(query).scalars().all()
+        print(type(res_orm[0]))
         res_dto = [ProviderRelDTO.model_validate(row, from_attributes=True) for row in res_orm]
         return res_dto
 
@@ -167,7 +168,7 @@ def units_get_list(session: session = session):
     query = select(Unit)
     with session() as conn:
         res_orm = conn.execute(query).scalars().all()
-        res_dto = [UnitReadDTO.model_validate(row, from_attributes=True) for row in res_orm]
+        res_dto = [UnitDTO.model_validate(row, from_attributes=True) for row in res_orm]
         return res_dto
 
 
@@ -192,11 +193,11 @@ def unit_get_by_id(pk: int, session: session = session):
     query = select(Unit).where(Unit.id == pk)
     with session() as conn:
         res_orm = conn.execute(query).scalar()
-        res_dto = UnitReadDTO.model_validate(res_orm, from_attributes=True)
+        res_dto = UnitDTO.model_validate(res_orm, from_attributes=True)
         return res_dto
 
 
-def unit_update(unit: UnitReadDTO, session: session = session):
+def unit_update(unit: UnitDTO, session: session = session):
     """Оновлення одиницю вимірювання"""
     stmt = update(Unit).where(Unit.id == unit.id).values(**unit.dict())
     with session() as conn:

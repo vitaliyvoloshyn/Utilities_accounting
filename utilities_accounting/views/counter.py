@@ -6,16 +6,10 @@ from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
 from utilities_accounting.db_api import get_categories
-from utilities_accounting.models import Counter, Unit, Provider, Category
-from utilities_accounting.repositories import BaseRepository
-from utilities_accounting.schemas import CounterDTO, CounterAddDTO, UnitReadDTO, ProviderDTO, CategoryDTO, \
-    CounterCategoryDTO
+from utilities_accounting.repositories import counter_repository
 
 counter_router = APIRouter(prefix='/counter', tags=['Counter'])
-counter_repo = BaseRepository(
-    model=Counter,
-    dto_read_model=CounterDTO
-)
+
 templates = Jinja2Templates(directory='templates')
 
 categories = get_categories()
@@ -24,7 +18,7 @@ categories = get_categories()
 @counter_router.get('/')
 async def get_counter_list(request: Request):
     """Сторінка зі списком лічильників"""
-    counters = counter_repo.get_list_objects(model=Category, model_dto=CounterCategoryDTO)
+    counters = counter_repository.get_list_objects()
     return templates.TemplateResponse(name='counters_list.html',
                                       context={
                                           'request': request,
@@ -37,7 +31,7 @@ async def get_counter_list(request: Request):
 @counter_router.get('/add')
 async def add_counter_form(request: Request):
     """Сторінка додання лічильника"""
-    units = counter_repo.get_list_objects_another_model(Unit, UnitReadDTO)
+    units = counter_repo.get_list_objects_another_model(Unit, UnitDTO)
     return templates.TemplateResponse(name='counters_add_form.html',
                                       context={
                                           'request': request,

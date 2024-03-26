@@ -50,13 +50,13 @@ class CounterDTO(CounterAddDTO):
 
 
 class CounterUnitRelDTO(CounterDTO):
-    unit: 'UnitReadDTO'
+    unit: 'UnitDTO'
 
 
 class CounterCategoryDTO(BaseModel):
     id: int
     name: str
-    unit: 'UnitReadDTO'
+    unit: 'UnitDTO'
     categories: List['CategoryDTO']
 
 
@@ -132,6 +132,6 @@ class UnitAddDTO(BaseModel):
     value: str
 
 
-class UnitReadDTO(UnitAddDTO):
+class UnitDTO(UnitAddDTO):
     """Одєкт одиниці вимірювання без відношень"""
     id: int

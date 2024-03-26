@@ -12,12 +12,12 @@ from starlette.responses import RedirectResponse
 from exceptions import ExistORMObject
 from utilities_accounting.models import Account, Unit
 from utilities_accounting.schemas import CategoryDTO, CategoryRelDTO, UnitAddDTO, CategoryAddDTO, CounterAddDTO, \
-    ProviderAddDTO, CurrencyDTO, AccountAddDTO, CurrencyAddDTO, UnitReadDTO, AccountDTO, AccountRelDTO
+    ProviderAddDTO, CurrencyDTO, AccountAddDTO, CurrencyAddDTO, UnitDTO, AccountDTO, AccountRelDTO, CounterRelDTO
 from utilities_accounting.db_api import get_category, get_rel_categories, get_providers_list, get_categories, \
     add_category_orm, add_category_and_counter, get_categories_counters, add_provider_orm, get_accounts_list, \
     get_currency_list, add_account_orm, add_currency_orm, currency_delete_orm, get_currency_by_id, currency_update, \
     units_get_list, unit_add_orm, unit_delete_orm, unit_get_by_id, unit_update
-from utilities_accounting.repositories import BaseRepository
+from utilities_accounting.repositories import BaseRepository, currency_repository
 
 router = APIRouter(prefix='/category', tags=['Main app'])
 index_router = APIRouter(tags=['Index'])
@@ -41,7 +41,6 @@ async def index(request: Request):
 async def category(request: Request, pk: int):
     categories = get_rel_categories()
     cur_category = get_category(pk)[0]
-    print(categories)
     return templates.TemplateResponse(name='category.html', context={'request': request,
                                                                      'cur_category': cur_category,
                                                                      'categories': categories})
@@ -64,7 +63,6 @@ async def get_provider(request: Request, provider_pk: int):
 async def get_providers(request: Request):
     providers = get_providers_list()
     categories = get_categories()
-    print(providers)
     return templates.TemplateResponse(name='providers.html', context={'request': request,
                                                                       'cur_category': [],
                                                                       'providers': providers,
@@ -186,7 +184,7 @@ async def add_account(
 def currency_list_view(request: Request):
     """Сторінка зі списком особових рахунків"""
     categories = get_categories()
-    currencies = get_currency_list()
+    currencies = currency_repository.get_list_objects()
     return templates.TemplateResponse(name='currencies.html', context={'request': request,
                                                                        'cur_category': [],
                                                                        'categories': categories,
@@ -198,13 +196,9 @@ def currency_list_view(request: Request):
 def currency_add_page_view(request: Request):
     """Сторінка додавання особового рахунку"""
     categories = get_categories()
-    providers = get_providers_list()
-    currencies = get_currency_list()
     return templates.TemplateResponse(name='add_currency_form.html', context={'request': request,
                                                                               'cur_category': [],
                                                                               'categories': categories,
-                                                                              # 'providers': providers,
-                                                                              # 'currencies': currencies,
                                                                               })
 
 
@@ -240,7 +234,7 @@ def currency_delete(pk: int):
 def currency_update_form(request: Request, pk: int):
     """Форма редагування валюти"""
     categories = get_categories()
-    currency = get_currency_by_id(pk)
+    currency = currency_repository.get_object_by_id(pk)
     return templates.TemplateResponse(name='currency_update.html', context={'request': request,
                                                                             'cur_category': [],
                                                                             'categories': categories,
@@ -290,7 +284,8 @@ def unit_add_page_view(request: Request):
                                                                           })
 
 
-repo = BaseRepository(Unit, UnitAddDTO)
+repo = BaseRepository(Unit, dto_read_model=UnitAddDTO, dto_add_model=CounterAddDTO,
+    dto_rel_model=CounterRelDTO,)
 
 
 @admin_router.post('/unit/add')
@@ -300,7 +295,7 @@ def unit_add_post(
     """POST-запит на додання одиниці вимірювання, передання інформації в БД"""
     unit_dto = UnitAddDTO.model_validate({'value': value})
     try:
-        repo.add_object(unit_dto)
+        repo.add(unit_dto)
     except IntegrityError as e:
         return {'detail': e}
     return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)
@@ -334,7 +329,7 @@ def unit_update_form(request: Request, pk: int):
 def unit_update_post(pk: int, value: str = Form()):
     """POST-запит на редагування одиниці вимірювання"""
     try:
-        unit_dto = UnitReadDTO.model_validate({
+        unit_dto = UnitDTO.model_validate({
             'id': pk,
             'value': value,
         })
@@ -342,7 +337,7 @@ def unit_update_post(pk: int, value: str = Form()):
         return {'detail': e.errors()}
 
     try:
-        repo.add_object(unit_dto)
+        repo.add(unit_dto)
     except IntegrityError as e:
         return {'detail': e}
     return RedirectResponse('/admin/unit', status_code=status.HTTP_303_SEE_OTHER)

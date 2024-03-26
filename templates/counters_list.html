@@ -13,7 +13,7 @@
         {% for counter in counters %}
             <tr>
                 <td class="col-sm-4">{{counter.name}}</td>
-                <td class="col-sm-1">{{currency.unit.value}}</td>
+                <td class="col-sm-1">{{counter.unit.value}}</td>
                 <td class="col-sm-2"><a class="btn btn-outline-primary" href="/admin/counter/{{counter.id}}" role="button">Редагувати</a></td>
                 <td class="col-sm-2"><a class="btn btn-outline-danger" href="/admin/counter/{{counter.id}}/delete" role="button">Видалити</a></td>
             </tr>
