@@ -30,6 +30,20 @@ async def get_counter_list(request: Request):
                                       })
 
 
+@counter_router.get('/add')
+async def add_counter_form(request: Request):
+    """Сторінка додання лічильника"""
+    print('jjjjjjjjjjjj')
+    units = unit_repository.get_object_list()
+    return templates.TemplateResponse(name='counters_add_form.html',
+                                      context={
+                                          'request': request,
+                                          'categories': categories,
+                                          'cur_category': [],
+                                          'units': units,
+                                      })
+
+
 @counter_router.get('/{pk}')
 async def get_counter(request: Request, pk: int):
     """Сторінка з формою для редагування лічильника"""
@@ -44,50 +58,51 @@ async def get_counter(request: Request, pk: int):
                                       })
 
 
-# @counter_router.get('/add')
-# async def add_counter_form(request: Request):
-#     """Сторінка додання лічильника"""
-#     units = counter_repo.get_list_objects_another_model(Unit, UnitDTO)
-#     return templates.TemplateResponse(name='counters_add_form.html',
-#                                       context={
-#                                           'request': request,
-#                                           'categories': categories,
-#                                           'cur_category': [],
-#                                           'units': units,
-#                                       })
 
 
-# @counter_router.post('/add')
-# def unit_add_post(
-#         name: str = Form(),
-#         unit_id: int = Form(),
-#         category_id: int = Form()
-# ):
-#     """POST-запит на додання лічильника, передання інформації в БД"""
-#     counter_dto = CounterAddDTO.model_validate({'name': name, 'unit_id': unit_id})
-#     try:
-#         counter_repo.add_counter(counter_dto, category_id)
-#     except IntegrityError as e:
-#         return {'detail': e}
-#     return RedirectResponse('/admin/counter', status_code=status.HTTP_303_SEE_OTHER)
+@counter_router.post('/add')
+async def add_counter(
+        name: str = Form(),
+        unit_id: int = Form(),
+        category_id: List[int] = Form()
+):
+    """POST-запит на додання лічильника, передання інформації в БД"""
+    try:
+        counter_repository.add({
+            'unit_id': unit_id,
+            'category_id': category_id,
+            'name': name,
+        })
+    except IntegrityError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/counter', status_code=status.HTTP_303_SEE_OTHER)
+
 
 @counter_router.post('/{pk}')
-def unit_add_post(request: Request,
-                  pk: int,
-                  unit_id: int = Form(),
-                  category_id: List[int] = Form()
-                  ):
+def update_counter(
+        pk: int,
+        name: str = Form(),
+        unit_id: int = Form(),
+        category_id: List[int] = Form()
+):
     """POST-запит на редагування лічильника, передання інформації в БД"""
-
-
-    # counter_dto = CounterAddDTO.model_validate({'name': name, 'unit_id': unit_id})
     try:
-        counter_repository.add_object({
+        counter_repository.update({
             'counter_id': pk,
             'unit_id': unit_id,
             'category_id': category_id,
-
+            'name': name,
         })
+    except IntegrityError as e:
+        return {'detail': e}
+    return RedirectResponse('/admin/counter', status_code=status.HTTP_303_SEE_OTHER)
+
+
+@counter_router.get('/{pk}/delete')
+def delete_counter(pk: int):
+    """Видалення лічильника"""
+    try:
+        counter_repository.delete_object(pk)
     except IntegrityError as e:
         return {'detail': e}
     return RedirectResponse('/admin/counter', status_code=status.HTTP_303_SEE_OTHER)

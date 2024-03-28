@@ -43,7 +43,7 @@ class Counter(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
     unit_id: Mapped[int] = mapped_column(ForeignKey('unit.id'))
-    categories: Mapped[List['Category']] = relationship(back_populates='counters', secondary='category_counter')
+    categories: Mapped[List['Category']] = relationship(back_populates='counters', secondary='category_counter', lazy='selectin')
     indicators: Mapped[List['Indicator']] = relationship(back_populates='counter')
     unit: Mapped['Unit'] = relationship(back_populates='counters')
 

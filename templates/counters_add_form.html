@@ -17,8 +17,7 @@
                 </select>
 
                 <label for="category" class="form-label label">Категорія</label>
-                <select class="form-select" id="category" name="category_id">
-                    <option selected>Виберіть зі списку категорію...</option>
+                <select class="form-select" id="category" name="category_id" multiple>
                     {% for category in categories %}
                         <option value="{{category.id}}">{{category.name}}</option>
                     {% endfor %}

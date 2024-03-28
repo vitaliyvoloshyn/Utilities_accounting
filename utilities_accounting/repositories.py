@@ -19,24 +19,31 @@ class UnitRepository(BaseRepository):
 
 
 class CounterRepository(BaseRepository):
-    def add_object(self, data: dict):
-        categories_id = data.get('category_id')
-        categories_dto = [category_repository.get_object_by_id(category_id, validate=False) for category_id in categories_id]
-        counter_dto = self.get_object_by_id(data.get('counter_id'), validate=False)
-        print(counter_dto)
-        unit_dto = unit_repository.get_object_by_id(data.get('unit_id'), validate=False)
-        counter_dto.unit = unit_dto
-        counter_dto.categories.extend(categories_dto)
-        # counter_orm = Counter(**counter_dto.dict())
-        # categories_orm = [Category(**category.dict()) for category in categories_dto]
-        # unit_orm = Unit(**unit_dto.dict())
-        # counter_orm.categories.extend(categories_orm)
-        # counter_orm.unit = unit_orm
-        self.session_update(**counter_dto.dict())
+    def update(self, data: dict):
 
-    def session_add(self, orm_model: Base):
         with self.session() as session:
-            session.add(orm_model)
+            new_counter_name = data.get('name')
+            unit_id = data.get('unit_id')
+            counter_orm = session.execute(select(Counter).where(Counter.id == data.get('counter_id'))).scalar()
+            unit_orm = session.execute(select(Unit).where(Unit.id == unit_id)).scalar()
+            categories_orm = session.execute(select(Category).where((Category.id.in_(data.get('category_id'))))).scalars().all()
+            counter_orm.name = new_counter_name
+            counter_orm.unit = unit_orm
+            counter_orm.categories = categories_orm
+            session.commit()
+
+    def add(self, data: dict):
+
+        with self.session() as session:
+            new_counter_name = data.get('name')
+            unit_id = data.get('unit_id')
+            categories_id = data.get('category_id')
+            counter_orm = Counter(name=new_counter_name)
+            unit_orm = session.execute(select(Unit).where(Unit.id == unit_id)).scalar()
+            categories_orm = session.execute(select(Category).where((Category.id.in_(categories_id)))).scalars().all()
+            counter_orm.unit = unit_orm
+            counter_orm.categories = categories_orm
+            session.add(counter_orm)
             session.commit()
 
 

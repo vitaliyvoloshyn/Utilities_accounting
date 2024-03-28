@@ -1,7 +1,7 @@
 from typing import Type, List, Union, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 
 from database import get_db
 from utilities_accounting.models import Base, Category, Counter, Currency
@@ -47,6 +47,9 @@ class BaseRepository:
         dto_model = self.validate_dict_to_schema(data)
         self.session_add(dto_model)
 
+    def delete_object(self, pk: int):
+        self.session_delete(pk)
+
     # @staticmethod
     # def _model_validate(orm_obj, dto_model) -> Union[BaseModel, List[BaseModel]]:
     #     if isinstance(orm_obj, list):
@@ -84,6 +87,11 @@ class BaseRepository:
     def session_update(self, values: dict):
         with self.session() as session:
             session.execute(update(self.orm_model).values(**values))
+
+    def session_delete(self, pk: int):
+        with self.session() as session:
+            session.execute(delete(self.orm_model).where(self.orm_model.id == pk))
+            session.commit()
 
     # def __session_get_with_join(self, join_model: Base,pk: Optional[int] = None):
     #     """Витягує дані з таблиці БД. Якщо вказаний id - повертає один запис, якщо не вказаний - список"""
