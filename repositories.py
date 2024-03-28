@@ -1,7 +1,7 @@
 from typing import Type, List, Union, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from database import get_db
 from utilities_accounting.models import Base, Category, Counter, Currency
@@ -24,68 +24,66 @@ class BaseRepository:
         self.orm_model = model
         self.dto_read_model = dto_read_model
         self.dto_rel_model = dto_rel_model
+        self.dto_add_model = dto_add_model
 
-    @staticmethod
-    def context_session(session: sessionmaker):
-        """Декоратор, який відкриває сессію в контекстному менеджері для функцій репозиторію"""
+    # @staticmethod
+    # def context_session(session: sessionmaker):
+    #     """Декоратор, який відкриває сессію в контекстному менеджері для функцій репозиторію"""
+    #
+    #     def inner_func(func: callable):
+    #         def wrapper(*args):
+    #             with session() as conn:
+    #                 func(*args, conn)
+    #         return wrapper
+    #     return inner_func
 
-        def inner_func(func: callable):
-            def wrapper(*args):
-                with session() as conn:
-                    func(*args, conn)
+    def get_object_by_id(self, pk: int, with_relation: bool = False, validate: bool = True):
+        return self.session_get(with_relation=with_relation, pk=pk, validate=validate)
 
-            return wrapper
+    def get_object_list(self, with_relation: bool = False):
+        return self.session_get(with_relation=with_relation)
 
-        return inner_func
+    def add_object(self, data: dict):
+        dto_model = self.validate_dict_to_schema(data)
+        self.session_add(dto_model)
 
-    def get_object_by_id(self, pk: int):
-        return self.__session_get(pk)
+    # @staticmethod
+    # def _model_validate(orm_obj, dto_model) -> Union[BaseModel, List[BaseModel]]:
+    #     if isinstance(orm_obj, list):
+    #         return [dto_model.model_validate(row, from_attributes=True) for row in orm_obj]
+    #     return dto_model.model_validate(orm_obj, from_attributes=True)
 
-    def get_list_objects(self):
-        return self.__session_get()
-
-    def get_list_objects_without_relation(self, dto_model: Type[BaseModel]):
-        list_obj_orm = self.session.execute(select(self.orm_model)).scalars().all()
-        return self._model_validate(list_obj_orm, dto_model)
-
-    def add_counter(self, counter: Type[BaseModel], category_id: int):
-        category_orm = self.session.execute(select(Category).where(Category.id == category_id)).scalar()
-        counter_orm = Counter(**counter.dict())
-        counter_orm.categories.append(category_orm)
-        self.session.add(counter_orm)
-        self.session.commit()
-
-    def get_list_objects_another_model(self, model: Base, dto_model: BaseModel):
-        list_obj_orm = self.session.execute(select(model)).scalars().all()
-        return self._model_validate(list_obj_orm, dto_model)
-
-    @staticmethod
-    def _model_validate(orm_obj, dto_model) -> Union[BaseModel, List[BaseModel]]:
-        if isinstance(orm_obj, list):
-            return [dto_model.model_validate(row, from_attributes=True) for row in orm_obj]
-        return dto_model.model_validate(orm_obj, from_attributes=True)
-
-    @context_session(session)
-    def add(self, dto_model: BaseModel, session=None):
-        orm_obj = self.orm_model(**dto_model.dict())
-        session.add(orm_obj)
-        session.commit()
+    # @context_session(session)
+    # def add(self, dto_model: BaseModel, session=None):
+    #     orm_obj = self.orm_model(**dto_model.dict())
+    #     session.add(orm_obj)
+    #     session.commit()
 
     #     __________________________________________
-    def __session_add(self, dto_model: Type[BaseModel]):
+    def session_add(self, dto_model: BaseModel):
         """Додання об'єкта в БД. На вхід приймає провалідовану модель (схему)"""
         with self.session() as session:
-            session.add(**dto_model.dict())
+            self.orm_model(**dto_model.dict())
+            session.add(self.orm_model(**dto_model.dict()))
             session.commit()
 
-    def __session_get(self, pk: Optional[int] = None):
+    def session_get(self, with_relation: bool, validate: bool = True, pk: Optional[int] = None):
         """Витягує дані з таблиці БД. Якщо вказаний id - повертає один запис, якщо не вказаний - список"""
+        dto_model = self.dto_read_model
+        if with_relation:
+            dto_model = self.dto_rel_model
         with self.session() as session:
             if pk:
                 obj_orm = session.execute(select(self.orm_model).where(self.orm_model.id == pk)).scalar()
             else:
                 obj_orm = session.execute(select(self.orm_model)).scalars().all()
-            return self.__validate_orm_to_schema(obj_orm, self.dto_read_model)
+            if validate:
+                return self.validate_orm_to_schema(obj_orm, dto_model)
+            return obj_orm
+
+    def session_update(self, values: dict):
+        with self.session() as session:
+            session.execute(update(self.orm_model).values(**values))
 
     # def __session_get_with_join(self, join_model: Base,pk: Optional[int] = None):
     #     """Витягує дані з таблиці БД. Якщо вказаний id - повертає один запис, якщо не вказаний - список"""
@@ -96,12 +94,12 @@ class BaseRepository:
     #             obj_orm = session.execute(select(self.orm_model)).join(join_model).scalars().all()
     #         return self.__validate_orm_to_schema(obj_orm, self.dto_read_model)
 
-    def __validate_dict_to_schema(self, data: dict) -> Type[BaseModel]:
+    def validate_dict_to_schema(self, data: dict) -> BaseModel:
         """Відповідає за валідацію даних в схему. На вхід приймає словник"""
-        pass
+        return self.dto_add_model.model_validate(data)
 
     @staticmethod
-    def __validate_orm_to_schema(orm_model: Base, dto_model: Type[BaseModel]) -> BaseModel | List[BaseModel]:
+    def validate_orm_to_schema(orm_model: Base, dto_model: Type[BaseModel]) -> BaseModel | List[BaseModel]:
         """Відповідає за валідацію даних ORM в схему. На вхід приймає модель або список моделей ORM.
         Повертає схему"""
         if not orm_model:

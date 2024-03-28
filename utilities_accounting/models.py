@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import String, ForeignKey, func, Enum as sa_Enum
+from sqlalchemy import String, ForeignKey, func, Enum as sa_Enum, Column, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 
@@ -55,6 +55,13 @@ class CategoryCounter(Base):
     __tablename__ = 'category_counter'
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id'), primary_key=True)
     counter_id: Mapped[int] = mapped_column(ForeignKey('counter.id'), primary_key=True)
+
+# category_counter_association_table = Table(
+#     'category_counter_association',
+#     Base.metadata,
+#     Column('category_id', ForeignKey('category.id'), primary_key=True),
+#     Column('counter_id', ForeignKey('counter.id'), primary_key=True),
+# )
 
 
 class Indicator(Base):

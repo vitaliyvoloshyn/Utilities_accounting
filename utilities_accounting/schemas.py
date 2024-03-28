@@ -16,7 +16,8 @@ class CategoryDTO(CategoryAddDTO):
 
 class CategoryCounterRelDTO(CategoryDTO):
     """view: get_category_list"""
-    counters: List["CounterUnitRelDTO"]
+    providers: List["ProviderDTO"]
+    counters: List["CounterDTO"]
 
 
 class CategoryRelDTO(CategoryCounterRelDTO):
@@ -133,7 +134,6 @@ class CounterDTO(CounterAddDTO):
 
 
 class CounterRelDTO(CounterDTO):
+    categories: List['CategoryDTO']
     unit: 'UnitDTO'
-    category: List['CategoryDTO']
     indicators: List['IndicatorDTO']
-

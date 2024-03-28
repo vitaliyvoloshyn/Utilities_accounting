@@ -20,9 +20,7 @@ def get_category(pk: int, session: session = session):
     )
     with session() as conn:
         res_orm = conn.execute(query).scalars().all()
-        print(f"++++-++++++res_orm = {res_orm}")
         res_dto = [CategoryRelDTO.model_validate(row, from_attributes=True) for row in res_orm]
-        print(res_dto)
         return res_dto
 
 

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <form action="#" method="post">
+            <div class="col-md">
+                <label for="name" class="form-label label">Назва лічильника</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{counter.name}}">
+
+                <label for="unit" class="form-label label">Одиниця вимірювання</label>
+                <select class="form-select" id="unit" name="unit_id">
+                    {% for unit in units %}
+                        <option value="{{unit.id}}"
+                                {% if unit.id == counter.unit_id %}
+                                selected
+                                {% endif %}
+                        >{{unit.value}}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="category" class="form-label label">Категорія</label>
+                <select class="form-select" id="category" name="category_id" multiple autofocus>
+                    {% for category in categories %}
+                        <option
+                                {% for category_counter in counter.categories %}
+                                    {% if category_counter.id == category.id %}
+                                    selected
+                                    {% endif %}
+                                {% endfor %}
+                                value="{{category.id}}">{{category.name}}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-outline-primary btn-safe" id="Paymentbtn">Зберегти</button>
+        </form>
+    </div>
+</div>
+
+</div>
+
+{% endblock %}
+

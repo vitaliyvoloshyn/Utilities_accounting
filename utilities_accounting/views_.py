@@ -138,7 +138,7 @@ async def add_category_post(categoryName: str = Form(),
 @admin_router.get('/account')
 async def get_account(request: Request):
     categories = get_categories_counters()
-    accounts = account_repo.get_list_objects()
+    accounts = account_repo.get_object_list()
     return templates.TemplateResponse(name='accounts.html', context={'request': request,
                                                                      'cur_category': [],
                                                                      'categories': categories,
@@ -184,7 +184,7 @@ async def add_account(
 def currency_list_view(request: Request):
     """Сторінка зі списком особових рахунків"""
     categories = get_categories()
-    currencies = currency_repository.get_list_objects()
+    currencies = currency_repository.get_object_list()
     return templates.TemplateResponse(name='currencies.html', context={'request': request,
                                                                        'cur_category': [],
                                                                        'categories': categories,
